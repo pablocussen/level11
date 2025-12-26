@@ -619,7 +619,85 @@
             TARGET_LEVEL: 75,
             XP_PER_LEVEL: 100,
             SECRET_CODE: "1983HAWKINS",
-            VERSION: "1.0.0"
+            VERSION: "1.1.0"
+        };
+
+        // Sound System (Web Audio API - No external files needed)
+        const SoundSystem = {
+            ctx: null,
+            enabled: true,
+
+            init() {
+                this.ctx = new (window.AudioContext || window.webkitAudioContext)();
+                this.enabled = localStorage.getItem('soundEnabled') !== 'false';
+            },
+
+            toggle() {
+                this.enabled = !this.enabled;
+                localStorage.setItem('soundEnabled', this.enabled);
+                return this.enabled;
+            },
+
+            play(type) {
+                if (!this.enabled || !this.ctx) return;
+
+                const sounds = {
+                    click: () => this.beep(800, 0.05, 0.1),
+                    success: () => this.successSound(),
+                    levelUp: () => this.levelUpSound(),
+                    achievement: () => this.achievementSound(),
+                    streak: () => this.streakSound(),
+                    warning: () => this.warningSound()
+                };
+
+                if (sounds[type]) sounds[type]();
+            },
+
+            beep(freq, duration, volume = 0.3) {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.frequency.value = freq;
+                osc.type = 'sine';
+
+                gain.gain.setValueAtTime(volume, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + duration);
+
+                osc.start(this.ctx.currentTime);
+                osc.stop(this.ctx.currentTime + duration);
+            },
+
+            successSound() {
+                this.beep(523.25, 0.1, 0.2); // C5
+                setTimeout(() => this.beep(659.25, 0.1, 0.2), 100); // E5
+                setTimeout(() => this.beep(783.99, 0.15, 0.25), 200); // G5
+            },
+
+            levelUpSound() {
+                const notes = [261.63, 329.63, 392, 523.25]; // C4, E4, G4, C5
+                notes.forEach((freq, i) => {
+                    setTimeout(() => this.beep(freq, 0.15, 0.3), i * 100);
+                });
+            },
+
+            achievementSound() {
+                this.beep(880, 0.1, 0.25);
+                setTimeout(() => this.beep(1046.5, 0.2, 0.3), 100);
+            },
+
+            streakSound() {
+                this.beep(440, 0.08, 0.15);
+                setTimeout(() => this.beep(554.37, 0.08, 0.15), 80);
+                setTimeout(() => this.beep(659.25, 0.12, 0.2), 160);
+            },
+
+            warningSound() {
+                this.beep(220, 0.15, 0.2);
+                setTimeout(() => this.beep(196, 0.15, 0.2), 150);
+            }
         };
 
         // State
@@ -752,6 +830,7 @@
 
             if (newLevel > state.level) {
                 state.level = newLevel;
+                SoundSystem.play('levelUp');
                 checkAchievements();
                 showCelebration(`¡SUBISTE A NIVEL ${state.level}!`, `Ganaste +${(newLevel - state.level) * 100} XP`);
                 return true;
@@ -785,9 +864,15 @@
                 if (state.achievements[key] && !oldAchievements[key]) {
                     const achievement = getAchievementData(key);
                     setTimeout(() => {
+                        SoundSystem.play('achievement');
                         showCelebration(`¡LOGRO DESBLOQUEADO!`, achievement.name);
                     }, 500);
                 }
+            }
+
+            // Play streak sound if streak increased
+            if (state.streak > 0 && state.streak !== oldAchievements.streak) {
+                SoundSystem.play('streak');
             }
         }
 
@@ -857,9 +942,18 @@
 
             state.todayCheckedIn = true;
 
-            checkLevelUp();
+            const leveledUp = checkLevelUp();
             checkAchievements();
             saveState();
+
+            // Play sounds based on day status
+            if (dayStatus === 'stable') {
+                SoundSystem.play('success');
+            } else if (dayStatus === 'breach') {
+                SoundSystem.play('warning');
+            } else {
+                SoundSystem.play('click');
+            }
 
             showCelebration(
                 `¡CHECK-IN COMPLETADO!`,
@@ -1033,7 +1127,32 @@
                     /* system version ${CONFIG.VERSION} // location: HAWKINS */<br/>
                     Día ${state.totalDays} del desafío
                 </div>
+
+                <div style="margin-top: 16px; text-align: center;">
+                    <button onclick="toggleSound()" style="
+                        background: rgba(0,0,0,0.6);
+                        border: 1px solid ${SoundSystem.enabled ? '#00ff88' : 'rgba(255,255,255,0.2)'};
+                        color: ${SoundSystem.enabled ? '#00ff88' : 'rgba(255,255,255,0.4)'};
+                        padding: 8px 16px;
+                        font-family: 'Courier New', monospace;
+                        font-size: 10px;
+                        cursor: pointer;
+                        transition: all 0.3s;
+                        border-radius: 4px;
+                        letter-spacing: 1px;
+                    ">
+                        ${SoundSystem.enabled ? '🔊 SONIDO ON' : '🔇 SONIDO OFF'}
+                    </button>
+                </div>
             `;
+        }
+
+        function toggleSound() {
+            const enabled = SoundSystem.toggle();
+            if (enabled) {
+                SoundSystem.play('click');
+            }
+            render();
         }
 
         function renderAchievementsView() {
@@ -1303,6 +1422,7 @@
 
         // Initialize
         function init() {
+            SoundSystem.init();
             loadState();
             render();
 
@@ -1316,6 +1436,13 @@
             }, 500);
 
             setInterval(triggerGlitch, 2000);
+
+            // Request notification permission
+            if ('Notification' in window && Notification.permission === 'default') {
+                setTimeout(() => {
+                    Notification.requestPermission();
+                }, 2000);
+            }
         }
 
         // Start app
