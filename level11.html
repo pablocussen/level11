@@ -1,0 +1,1329 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="LEVEL:11 - Sistema gamificado de control digital para conseguir el iPhone 13">
+    <meta name="theme-color" content="#0a0a0f">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>🎮</text></svg>">
+    <title>LEVEL:11 - Digital Wellness Protocol</title>
+    <style>
+        @keyframes shine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+        }
+
+        @keyframes glow {
+            0%, 100% { text-shadow: 0 0 10px currentColor, 0 0 30px rgba(255,0,100,0.3); }
+            50% { text-shadow: 0 0 20px currentColor, 0 0 60px rgba(255,0,100,0.5); }
+        }
+
+        @keyframes glitch {
+            0% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
+            100% { transform: translate(0); }
+        }
+
+        @keyframes scanline {
+            0% { transform: translateY(-100%); }
+            100% { transform: translateY(100%); }
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.8; transform: scale(1.02); }
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(20px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        @keyframes celebration {
+            0%, 100% { transform: scale(1); }
+            25% { transform: scale(1.1) rotate(-5deg); }
+            75% { transform: scale(1.1) rotate(5deg); }
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background-color: #0a0a0f;
+            color: white;
+            overflow-x: hidden;
+            position: relative;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .background-grid {
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(255,0,100,0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255,0,100,0.03) 1px, transparent 1px);
+            background-size: 50px 50px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .vignette {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(ellipse at center, transparent 0%, #0a0a0f 100%);
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .scanline {
+            position: fixed;
+            width: 100%;
+            height: 2px;
+            background: linear-gradient(transparent, rgba(255,0,100,0.1), transparent);
+            animation: scanline 8s linear infinite;
+            pointer-events: none;
+            z-index: 2;
+        }
+
+        .container {
+            position: relative;
+            z-index: 10;
+            padding: 20px;
+            max-width: 600px;
+            margin: 0 auto;
+            padding-bottom: 60px;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 24px;
+            animation: slideUp 0.6s ease-out;
+        }
+
+        .header-subtitle {
+            font-size: 11px;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 4px;
+            margin-bottom: 8px;
+        }
+
+        .header-title {
+            font-size: clamp(32px, 8vw, 42px);
+            font-weight: 300;
+            letter-spacing: 8px;
+            animation: glow 2s ease-in-out infinite;
+            margin: 0;
+        }
+
+        .header-title.glitch {
+            animation: glitch 0.15s ease-in-out;
+            text-shadow: 2px 0 #ff0044, -2px 0 #00ff88;
+        }
+
+        .header-level {
+            color: #ff3366;
+        }
+
+        .header-target {
+            margin-top: 8px;
+            font-size: 12px;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 2px;
+        }
+
+        .progress-card {
+            background: linear-gradient(180deg, rgba(255,0,100,0.1) 0%, rgba(0,0,0,0.8) 100%);
+            padding: 20px;
+            margin-bottom: 20px;
+            border: 1px solid rgba(255,0,100,0.3);
+            position: relative;
+            transition: all 0.3s;
+            animation: slideUp 0.8s ease-out;
+        }
+
+        .progress-card:hover {
+            border-color: rgba(255,0,100,0.5);
+            box-shadow: 0 0 30px rgba(255,0,100,0.2);
+        }
+
+        .corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            transition: all 0.3s;
+        }
+
+        .corner.tl { top: -1px; left: -1px; border-top: 2px solid #ff3366; border-left: 2px solid #ff3366; }
+        .corner.tr { top: -1px; right: -1px; border-top: 2px solid #ff3366; border-right: 2px solid #ff3366; }
+        .corner.bl { bottom: -1px; left: -1px; border-bottom: 2px solid #ff3366; border-left: 2px solid #ff3366; }
+        .corner.br { bottom: -1px; right: -1px; border-bottom: 2px solid #ff3366; border-right: 2px solid #ff3366; }
+
+        .progress-labels {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            letter-spacing: 2px;
+            margin-bottom: 16px;
+        }
+
+        .progress-bar {
+            height: 8px;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid rgba(255,255,255,0.1);
+            overflow: hidden;
+            position: relative;
+            border-radius: 2px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #ff0066, #ff3366, #ff6699);
+            box-shadow: 0 0 20px #ff336666;
+            transition: width 1s ease-out;
+            position: relative;
+        }
+
+        .progress-shine {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shine 2s infinite;
+        }
+
+        .progress-stats {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 16px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.5);
+            letter-spacing: 1px;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+
+        .status-box {
+            background: rgba(0,0,0,0.6);
+            padding: 16px 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            transition: all 0.3s;
+            animation: slideUp 1s ease-out;
+        }
+
+        .status-text {
+            font-size: 14px;
+            font-weight: 500;
+            letter-spacing: 3px;
+        }
+
+        .status-info {
+            margin-top: 8px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .daily-checkin {
+            background: rgba(0,255,136,0.1);
+            border: 2px solid #00ff88;
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center;
+            animation: pulse 2s infinite;
+        }
+
+        .checkin-title {
+            font-size: 14px;
+            letter-spacing: 3px;
+            color: #00ff88;
+            margin-bottom: 12px;
+            text-shadow: 0 0 20px #00ff88;
+        }
+
+        .checkin-input {
+            width: 80px;
+            padding: 10px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.3);
+            color: #fff;
+            text-align: center;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            margin: 0 8px;
+            border-radius: 4px;
+            transition: all 0.3s;
+        }
+
+        .checkin-input:focus {
+            outline: none;
+            border-color: #00ff88;
+            box-shadow: 0 0 10px rgba(0,255,136,0.3);
+        }
+
+        .checkin-label {
+            display: block;
+            margin: 12px 0;
+            font-size: 12px;
+            color: rgba(255,255,255,0.7);
+        }
+
+        .btn-submit {
+            margin-top: 16px;
+            padding: 12px 32px;
+            background: rgba(0,255,136,0.2);
+            border: 2px solid #00ff88;
+            color: #00ff88;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            letter-spacing: 2px;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: bold;
+            border-radius: 4px;
+        }
+
+        .btn-submit:hover {
+            background: rgba(0,255,136,0.3);
+            box-shadow: 0 0 30px rgba(0,255,136,0.5);
+            transform: translateY(-2px);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
+        }
+
+        .nav-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 24px;
+        }
+
+        .nav-btn {
+            padding: 20px 12px;
+            background: rgba(0,0,0,0.6);
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.4);
+            font-size: 11px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            border-radius: 4px;
+        }
+
+        .nav-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 20px rgba(255,255,255,0.1);
+        }
+
+        .nav-btn.purple {
+            border-color: rgba(138,43,226,0.5);
+            color: #aa66ff;
+        }
+
+        .nav-btn.purple:hover {
+            box-shadow: 0 4px 20px rgba(138,43,226,0.3);
+            border-color: #aa66ff;
+        }
+
+        .nav-icon {
+            font-size: 20px;
+        }
+
+        .target-section {
+            margin-top: 24px;
+            text-align: center;
+            padding: 16px;
+            border-top: 1px solid rgba(255,255,255,0.1);
+        }
+
+        .target-label {
+            font-size: 10px;
+            color: rgba(255,255,255,0.3);
+            letter-spacing: 2px;
+            margin-bottom: 4px;
+        }
+
+        .target-date {
+            font-size: 16px;
+            color: #ff3366;
+            letter-spacing: 4px;
+            font-weight: 500;
+            text-shadow: 0 0 20px rgba(255,0,100,0.5);
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .target-status {
+            margin-top: 8px;
+            font-size: 11px;
+            color: rgba(255,255,255,0.4);
+        }
+
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.95);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            z-index: 1000;
+            animation: fadeIn 0.3s;
+            backdrop-filter: blur(4px);
+        }
+
+        .modal-content {
+            background: #0a0a0f;
+            padding: 24px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            border: 1px solid rgba(255,0,100,0.5);
+            position: relative;
+            animation: slideUp 0.3s;
+            max-height: 80vh;
+            overflow-y: auto;
+            border-radius: 4px;
+        }
+
+        .modal-title {
+            font-size: 12px;
+            letter-spacing: 3px;
+            color: #ff3366;
+            margin-bottom: 16px;
+        }
+
+        .modal-buttons {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            border-radius: 4px;
+        }
+
+        .btn-cancel {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            color: rgba(255,255,255,0.6);
+        }
+
+        .btn-cancel:hover {
+            border-color: rgba(255,255,255,0.6);
+            color: #fff;
+        }
+
+        .btn-confirm {
+            background: rgba(0,255,136,0.2);
+            border: 1px solid #00ff88;
+            color: #00ff88;
+        }
+
+        .btn-confirm:hover {
+            box-shadow: 0 0 20px rgba(0,255,136,0.3);
+            transform: translateY(-2px);
+        }
+
+        .achievement-item {
+            background: rgba(0,0,0,0.4);
+            padding: 16px;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            border: 1px solid rgba(255,255,255,0.1);
+            margin-bottom: 10px;
+            opacity: 0.4;
+            transition: all 0.3s;
+            border-radius: 4px;
+        }
+
+        .achievement-item:hover {
+            transform: translateX(4px);
+        }
+
+        .achievement-item.unlocked {
+            background: rgba(138,43,226,0.1);
+            border-color: rgba(138,43,226,0.5);
+            opacity: 1;
+        }
+
+        .achievement-icon {
+            font-size: 24px;
+            width: 40px;
+            text-align: center;
+        }
+
+        .achievement-icon.unlocked {
+            color: #aa66ff;
+            text-shadow: 0 0 15px rgba(138,43,226,0.8);
+            animation: celebration 0.5s;
+        }
+
+        .back-btn {
+            background: transparent;
+            border: 1px solid rgba(255,255,255,0.2);
+            padding: 10px 16px;
+            color: rgba(255,255,255,0.6);
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            border-radius: 4px;
+        }
+
+        .back-btn:hover {
+            border-color: rgba(255,255,255,0.6);
+            color: #fff;
+            transform: translateX(-4px);
+        }
+
+        .view-title {
+            font-size: 20px;
+            font-weight: 300;
+            margin-bottom: 24px;
+            text-align: center;
+            letter-spacing: 4px;
+        }
+
+        .motivational-msg {
+            background: rgba(255,170,0,0.1);
+            border: 1px solid rgba(255,170,0,0.3);
+            padding: 16px;
+            margin-bottom: 20px;
+            text-align: center;
+            font-size: 13px;
+            color: #ffaa00;
+            letter-spacing: 1px;
+            line-height: 1.6;
+            border-radius: 4px;
+            animation: slideUp 1.2s ease-out;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        /* Loading screen */
+        .loading {
+            position: fixed;
+            inset: 0;
+            background: #0a0a0f;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s;
+        }
+
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 3px solid rgba(255,0,100,0.3);
+            border-top-color: #ff3366;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                padding: 16px;
+            }
+
+            .header-title {
+                font-size: 28px;
+                letter-spacing: 4px;
+            }
+
+            .progress-stats {
+                font-size: 10px;
+            }
+
+            .nav-grid {
+                gap: 8px;
+            }
+
+            .nav-btn {
+                padding: 16px 8px;
+                font-size: 10px;
+            }
+        }
+
+        /* Print styles */
+        @media print {
+            .background-grid, .vignette, .scanline {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading screen -->
+    <div class="loading" id="loading">
+        <div class="loading-spinner"></div>
+    </div>
+
+    <!-- Background effects -->
+    <div class="background-grid"></div>
+    <div class="vignette"></div>
+    <div class="scanline"></div>
+
+    <!-- Main container -->
+    <div class="container" id="app"></div>
+
+    <script>
+        // Configuration
+        const CONFIG = {
+            START_DATE: new Date('2024-12-26'),
+            TARGET_DATE: new Date('2026-03-12'),
+            TARGET_LEVEL: 75,
+            XP_PER_LEVEL: 100,
+            SECRET_CODE: "1983HAWKINS",
+            VERSION: "1.0.0"
+        };
+
+        // State
+        const state = {
+            currentView: 'main',
+            level: 1,
+            xp: 0,
+            streak: 0,
+            totalDays: 0,
+            secretFound: false,
+            todayCheckedIn: false,
+            history: [],
+            weeklyRoblox: 0,
+            currentWeek: getCurrentWeek(),
+            achievements: {
+                first_login: false,
+                streak_3: false,
+                streak_7: false,
+                streak_14: false,
+                streak_30: false,
+                level_10: false,
+                level_25: false,
+                level_50: false,
+                level_75: false,
+                perfect_week: false,
+                mindflayer: false,
+                the_upside: false
+            },
+            todayStats: {
+                tiktok: 0,
+                instagram: 0,
+                roblox: 0,
+                unlocks: 0
+            },
+            limits: {
+                tiktok: 30,
+                instagram: 20,
+                roblox: 120,
+                unlocks: 50
+            }
+        };
+
+        // Motivational messages
+        const MOTIVATIONAL_MESSAGES = [
+            "¡Excelente trabajo! Mantén el control digital 🎮",
+            "Cada día estás más cerca del iPhone 13 📱",
+            "Tu disciplina es increíble. ¡Sigue así! ⚡",
+            "Los buenos hábitos construyen un gran futuro 🌟",
+            "¡Estás demostrando un autocontrol impresionante! 💪",
+            "Paso a paso, día a día, lo estás logrando 🚀",
+            "Tu progreso es inspirador. ¡No pares! ✨",
+            "Cada racha ganada es un paso hacia tu meta 🔥"
+        ];
+
+        // Utility functions
+        function getCurrentWeek() {
+            const now = new Date();
+            const onejan = new Date(now.getFullYear(), 0, 1);
+            return Math.ceil((((now - onejan) / 86400000) + onejan.getDay() + 1) / 7);
+        }
+
+        function getTodayKey() {
+            const now = new Date();
+            return `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
+        }
+
+        function getDaysSinceStart() {
+            const now = new Date();
+            const diff = now - CONFIG.START_DATE;
+            return Math.floor(diff / (1000 * 60 * 60 * 24));
+        }
+
+        function getDaysUntilTarget() {
+            const now = new Date();
+            const diff = CONFIG.TARGET_DATE - now;
+            return Math.ceil(diff / (1000 * 60 * 60 * 24));
+        }
+
+        function getStatus(current, limit) {
+            const ratio = current / limit;
+            if (ratio <= 1) return 'good';
+            if (ratio <= 1.2) return 'warning';
+            return 'critical';
+        }
+
+        function getDayStatus() {
+            const statuses = [
+                getStatus(state.todayStats.tiktok, state.limits.tiktok),
+                getStatus(state.todayStats.instagram, state.limits.instagram),
+                getStatus(state.weeklyRoblox, state.limits.roblox),
+                getStatus(state.todayStats.unlocks, state.limits.unlocks)
+            ];
+            if (statuses.some(s => s === 'critical')) return 'breach';
+            if (statuses.some(s => s === 'warning')) return 'alert';
+            return 'stable';
+        }
+
+        function getStatusColor(status) {
+            return {
+                good: '#00ff88',
+                warning: '#ffaa00',
+                critical: '#ff0044'
+            }[status];
+        }
+
+        function calculateXP(stats) {
+            let xp = 0;
+
+            if (stats.tiktok <= state.limits.tiktok) xp += 30;
+            if (stats.instagram <= state.limits.instagram) xp += 30;
+            if (state.weeklyRoblox <= state.limits.roblox) xp += 30;
+            if (stats.unlocks <= state.limits.unlocks) xp += 10;
+
+            if (stats.tiktok <= state.limits.tiktok * 0.5) xp += 20;
+            if (stats.instagram <= state.limits.instagram * 0.5) xp += 20;
+            if (state.weeklyRoblox <= state.limits.roblox * 0.5) xp += 20;
+
+            if (getDayStatus() === 'stable' &&
+                stats.tiktok <= state.limits.tiktok * 0.7 &&
+                stats.instagram <= state.limits.instagram * 0.7 &&
+                state.weeklyRoblox <= state.limits.roblox * 0.7) {
+                xp += 50;
+            }
+
+            return xp;
+        }
+
+        function checkLevelUp() {
+            const newLevel = Math.floor(state.xp / CONFIG.XP_PER_LEVEL) + 1;
+
+            if (newLevel > state.level) {
+                state.level = newLevel;
+                checkAchievements();
+                showCelebration(`¡SUBISTE A NIVEL ${state.level}!`, `Ganaste +${(newLevel - state.level) * 100} XP`);
+                return true;
+            }
+            return false;
+        }
+
+        function checkAchievements() {
+            const oldAchievements = {...state.achievements};
+
+            if (state.level >= 10) state.achievements.level_10 = true;
+            if (state.level >= 25) state.achievements.level_25 = true;
+            if (state.level >= 50) state.achievements.level_50 = true;
+            if (state.level >= 75) state.achievements.level_75 = true;
+
+            if (state.streak >= 3) state.achievements.streak_3 = true;
+            if (state.streak >= 7) state.achievements.streak_7 = true;
+            if (state.streak >= 14) state.achievements.streak_14 = true;
+            if (state.streak >= 30) state.achievements.streak_30 = true;
+
+            const lastWeek = state.history.slice(-7);
+            if (lastWeek.length === 7 && lastWeek.every(d => d.status === 'stable')) {
+                state.achievements.perfect_week = true;
+            }
+
+            if (state.level >= 60) state.achievements.mindflayer = true;
+            if (state.secretFound) state.achievements.the_upside = true;
+            state.achievements.first_login = true;
+
+            for (let key in state.achievements) {
+                if (state.achievements[key] && !oldAchievements[key]) {
+                    const achievement = getAchievementData(key);
+                    setTimeout(() => {
+                        showCelebration(`¡LOGRO DESBLOQUEADO!`, achievement.name);
+                    }, 500);
+                }
+            }
+        }
+
+        function getAchievementData(key) {
+            const achievements = {
+                first_login: { name: "FIRST_LOGIN", desc: "Sistema iniciado", icon: "◈" },
+                streak_3: { name: "FIREWALL", desc: "3 días consecutivos", icon: "◉" },
+                streak_7: { name: "STREAK_7", desc: "7 días consecutivos", icon: "▲" },
+                streak_14: { name: "FORTITUDE", desc: "14 días consecutivos", icon: "⬢" },
+                streak_30: { name: "CHAMPION", desc: "30 días consecutivos", icon: "★" },
+                level_10: { name: "EXPLORER", desc: "Alcanzar nivel 10", icon: "◎" },
+                level_25: { name: "WARRIOR", desc: "Alcanzar nivel 25", icon: "⬡" },
+                level_50: { name: "HERO", desc: "Alcanzar nivel 50", icon: "◆" },
+                level_75: { name: "LEGEND", desc: "Alcanzar nivel 75 - iPhone desbloqueado!", icon: "♔" },
+                perfect_week: { name: "PERFECT_WEEK", desc: "7 días perfectos seguidos", icon: "✦" },
+                mindflayer: { name: "MINDFLAYER", desc: "Superar el nivel 60", icon: "✧" },
+                the_upside: { name: "THE_UPSIDE", desc: "Descifrar el código oculto", icon: "⟁" }
+            };
+            return achievements[key] || {};
+        }
+
+        // Check-in
+        function submitDailyCheckin() {
+            const tiktok = parseInt(document.getElementById('input-tiktok').value) || 0;
+            const instagram = parseInt(document.getElementById('input-instagram').value) || 0;
+            const roblox = parseInt(document.getElementById('input-roblox').value) || 0;
+            const unlocks = parseInt(document.getElementById('input-unlocks').value) || 0;
+
+            const currentWeek = getCurrentWeek();
+            if (currentWeek !== state.currentWeek) {
+                state.weeklyRoblox = 0;
+                state.currentWeek = currentWeek;
+            }
+
+            state.weeklyRoblox += roblox;
+            state.todayStats = { tiktok, instagram, roblox, unlocks };
+
+            const xpGained = calculateXP(state.todayStats);
+            state.xp += xpGained;
+
+            const dayStatus = getDayStatus();
+
+            const yesterday = state.history[state.history.length - 1];
+            if (yesterday && yesterday.date === getTodayKey()) {
+                state.history[state.history.length - 1] = {
+                    date: getTodayKey(),
+                    stats: {...state.todayStats},
+                    status: dayStatus,
+                    xp: xpGained
+                };
+            } else {
+                if (dayStatus === 'stable' || dayStatus === 'alert') {
+                    state.streak++;
+                } else {
+                    state.streak = 0;
+                }
+
+                state.history.push({
+                    date: getTodayKey(),
+                    stats: {...state.todayStats},
+                    status: dayStatus,
+                    xp: xpGained
+                });
+
+                state.totalDays++;
+            }
+
+            state.todayCheckedIn = true;
+
+            checkLevelUp();
+            checkAchievements();
+            saveState();
+
+            showCelebration(
+                `¡CHECK-IN COMPLETADO!`,
+                `Ganaste ${xpGained} XP | Estado: ${dayStatus === 'stable' ? 'PERFECTO ✨' : dayStatus === 'alert' ? 'BIEN ⚠️' : 'MEJORAR 🔴'}`
+            );
+
+            render();
+        }
+
+        // Render functions (continuing in next message due to length...)
+
+        function renderDailyCheckin() {
+            if (state.todayCheckedIn) {
+                const dayStatus = getDayStatus();
+                const statusConfig = {
+                    stable: { color: '#00ff88', text: 'DÍA PERFECTO ✨', msg: 'Excelente control digital' },
+                    alert: { color: '#ffaa00', text: 'BUEN TRABAJO ⚠️', msg: 'Casi perfecto, sigue así' },
+                    breach: { color: '#ff0044', text: 'MEJORAR MAÑANA 🔴', msg: 'Intenta reducir el uso mañana' }
+                }[dayStatus];
+
+                return `
+                    <div class="status-box" style="border: 1px solid ${statusConfig.color}33; box-shadow: 0 0 30px ${statusConfig.color}44; background: rgba(0,0,0,0.8);">
+                        <div class="status-text" style="color: ${statusConfig.color}; text-shadow: 0 0 20px ${statusConfig.color};">
+                            ${statusConfig.text}
+                        </div>
+                        <div class="status-info" style="margin-top: 12px; font-size: 12px;">
+                            ${statusConfig.msg}
+                        </div>
+                        <div style="margin-top: 16px; padding: 12px; background: rgba(255,255,255,0.05); border-radius: 4px;">
+                            <div style="font-size: 11px; color: rgba(255,255,255,0.5); margin-bottom: 8px;">Resumen de hoy:</div>
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.8);">
+                                TikTok: ${state.todayStats.tiktok}/${state.limits.tiktok} min |
+                                IG: ${state.todayStats.instagram}/${state.limits.instagram} min<br/>
+                                Roblox: ${state.todayStats.roblox} min (${state.weeklyRoblox}/${state.limits.roblox} semanal) |
+                                Desbloqueos: ${state.todayStats.unlocks}/${state.limits.unlocks}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="daily-checkin">
+                    <div class="checkin-title">◈ CHECK-IN DIARIO ◈</div>
+                    <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 16px;">
+                        Reporta tu uso de hoy con honestidad
+                    </div>
+
+                    <div style="margin: 16px 0;">
+                        <div class="checkin-label">
+                            <span style="color: #ff006e;">▶</span> TikTok (minutos hoy):
+                            <input type="number" id="input-tiktok" class="checkin-input" min="0" max="999" value="0" />
+                            <span style="font-size: 10px; color: rgba(255,255,255,0.4);">/ ${state.limits.tiktok} diario</span>
+                        </div>
+                    </div>
+
+                    <div style="margin: 16px 0;">
+                        <div class="checkin-label">
+                            <span style="color: #00d4ff;">◎</span> Instagram (minutos hoy):
+                            <input type="number" id="input-instagram" class="checkin-input" min="0" max="999" value="0" />
+                            <span style="font-size: 10px; color: rgba(255,255,255,0.4);">/ ${state.limits.instagram} diario</span>
+                        </div>
+                    </div>
+
+                    <div style="margin: 16px 0;">
+                        <div class="checkin-label">
+                            <span style="color: #ffa500;">🎮</span> Roblox (minutos hoy):
+                            <input type="number" id="input-roblox" class="checkin-input" min="0" max="999" value="0" />
+                            <span style="font-size: 10px; color: rgba(255,255,255,0.4);">
+                                ${state.weeklyRoblox}/${state.limits.roblox} esta semana
+                            </span>
+                        </div>
+                    </div>
+
+                    <div style="margin: 16px 0;">
+                        <div class="checkin-label">
+                            <span style="color: #00ff88;">◇</span> Desbloqueos del celular:
+                            <input type="number" id="input-unlocks" class="checkin-input" min="0" max="999" value="0" />
+                            <span style="font-size: 10px; color: rgba(255,255,255,0.4);">/ ${state.limits.unlocks}</span>
+                        </div>
+                    </div>
+
+                    <button class="btn-submit" onclick="submitDailyCheckin()">
+                        ✓ REGISTRAR DÍA
+                    </button>
+
+                    <div style="margin-top: 12px; font-size: 10px; color: rgba(255,255,255,0.4); font-style: italic;">
+                        La honestidad es clave para alcanzar tu meta 🎯
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderMainView() {
+            const daysUntilTarget = getDaysUntilTarget();
+            const progressPercent = (state.level / 90) * 100;
+            const xpForNextLevel = (state.level * CONFIG.XP_PER_LEVEL) - state.xp;
+            const randomMsg = MOTIVATIONAL_MESSAGES[Math.floor(Math.random() * MOTIVATIONAL_MESSAGES.length)];
+
+            return `
+                <div class="header">
+                    <div class="header-subtitle">◈ DIGITAL WELLNESS PROTOCOL ◈</div>
+                    <h1 class="header-title" id="headerTitle">
+                        LEVEL:<span class="header-level">11</span>
+                    </h1>
+                    <div class="header-target">// TARGET: iPHONE UNLOCK</div>
+                </div>
+
+                ${!state.todayCheckedIn ? `
+                    <div class="motivational-msg">
+                        ${randomMsg}
+                    </div>
+                ` : ''}
+
+                <div class="progress-card">
+                    <div class="corner tl"></div>
+                    <div class="corner tr"></div>
+                    <div class="corner bl"></div>
+                    <div class="corner br"></div>
+
+                    <div class="progress-labels">
+                        <span style="color: rgba(255,255,255,0.5);">LVL.${state.level}</span>
+                        <span style="color: #ff3366;">${state.level}/90 DÍAS</span>
+                        <span style="color: rgba(255,255,255,0.5);">LVL.90</span>
+                    </div>
+
+                    <div class="progress-bar">
+                        <div class="progress-fill" style="width: ${progressPercent}%;">
+                            <div class="progress-shine"></div>
+                        </div>
+                    </div>
+
+                    <div class="progress-stats">
+                        <span>XP: <span style="color: #00ff88;">${state.xp.toLocaleString()}</span></span>
+                        <span>RACHA: <span style="color: #ffaa00;">${state.streak}d 🔥</span></span>
+                        <span>SIGUIENTE: <span style="color: #ff3366;">${xpForNextLevel} XP</span></span>
+                    </div>
+                </div>
+
+                ${renderDailyCheckin()}
+
+                <div class="nav-grid">
+                    <button class="nav-btn purple" onclick="changeView('achievements')">
+                        <span class="nav-icon">◈</span>
+                        LOGROS
+                    </button>
+                    <button class="nav-btn purple" onclick="changeView('history')">
+                        <span class="nav-icon">◫</span>
+                        HISTORIAL
+                    </button>
+                    <button class="nav-btn purple" onclick="changeView('stats')">
+                        <span class="nav-icon">■</span>
+                        STATS
+                    </button>
+                </div>
+
+                <div class="target-section">
+                    <div class="target-label">META FINAL</div>
+                    <div class="target-date">12.03.2026</div>
+                    <div class="target-status">
+                        ${state.level >= CONFIG.TARGET_LEVEL
+                            ? '🎉 ¡iPHONE 13 DESBLOQUEADO! 🎉'
+                            : `Faltan ${CONFIG.TARGET_LEVEL - state.level} niveles para desbloquear el iPhone`}
+                    </div>
+                    <div style="margin-top: 8px; font-size: 10px; color: rgba(255,255,255,0.3);">
+                        ${daysUntilTarget} días restantes
+                    </div>
+                </div>
+
+                <div style="margin-top: 20px; text-align: center; font-size: 9px; color: rgba(255,255,255,0.15);">
+                    /* system version ${CONFIG.VERSION} // location: HAWKINS */<br/>
+                    Día ${state.totalDays} del desafío
+                </div>
+            `;
+        }
+
+        function renderAchievementsView() {
+            const allAchievements = [
+                { key: 'first_login', ...getAchievementData('first_login') },
+                { key: 'streak_3', ...getAchievementData('streak_3') },
+                { key: 'streak_7', ...getAchievementData('streak_7') },
+                { key: 'streak_14', ...getAchievementData('streak_14') },
+                { key: 'streak_30', ...getAchievementData('streak_30') },
+                { key: 'level_10', ...getAchievementData('level_10') },
+                { key: 'level_25', ...getAchievementData('level_25') },
+                { key: 'level_50', ...getAchievementData('level_50') },
+                { key: 'level_75', ...getAchievementData('level_75') },
+                { key: 'perfect_week', ...getAchievementData('perfect_week') },
+                { key: 'mindflayer', ...getAchievementData('mindflayer') },
+                { key: 'the_upside', ...getAchievementData('the_upside') }
+            ];
+
+            const unlockedCount = allAchievements.filter(a => state.achievements[a.key]).length;
+
+            return `
+                <button class="back-btn" onclick="changeView('main')">← VOLVER</button>
+
+                <h2 class="view-title" style="color: #aa66ff; text-shadow: 0 0 20px rgba(138,43,226,0.5);">
+                    ◈ LOGROS (${unlockedCount}/${allAchievements.length}) ◈
+                </h2>
+
+                <div>
+                    ${allAchievements.map(ach => `
+                        <div class="achievement-item${state.achievements[ach.key] ? ' unlocked' : ''}">
+                            <div class="achievement-icon${state.achievements[ach.key] ? ' unlocked' : ''}"
+                                 style="color: ${state.achievements[ach.key] ? '#aa66ff' : 'rgba(255,255,255,0.3)'};">
+                                ${ach.icon}
+                            </div>
+                            <div style="flex: 1;">
+                                <div style="font-weight: 500; font-size: 13px; letter-spacing: 1px; color: ${state.achievements[ach.key] ? '#fff' : 'rgba(255,255,255,0.5)'};">
+                                    ${ach.name}
+                                    ${state.achievements[ach.key] ? '<span style="margin-left: 10px; color: #00ff88; font-size: 10px;">[✓]</span>' : ''}
+                                </div>
+                                <div style="font-size: 11px; color: rgba(255,255,255,0.4); margin-top: 4px;">
+                                    ${ach.desc}
+                                </div>
+                            </div>
+                        </div>
+                    `).join('')}
+                </div>
+
+                <div style="margin-top: 24px; padding: 16px; background: rgba(0,255,136,0.1); border: 1px solid rgba(0,255,136,0.3); text-align: center; font-size: 11px; color: rgba(255,255,255,0.8); border-radius: 4px;">
+                    Sigue cumpliendo tus metas diarias para desbloquear más logros 🌟
+                </div>
+            `;
+        }
+
+        function renderHistoryView() {
+            const last30Days = state.history.slice(-30);
+
+            return `
+                <button class="back-btn" onclick="changeView('main')">← VOLVER</button>
+
+                <h2 class="view-title" style="color: #00aaff; text-shadow: 0 0 20px rgba(0,150,255,0.5);">
+                    ◫ HISTORIAL (${state.history.length} días) ◫
+                </h2>
+
+                ${state.history.length === 0 ? `
+                    <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.4);">
+                        Aún no has registrado ningún día.<br/>
+                        ¡Haz tu primer check-in para comenzar!
+                    </div>
+                ` : `
+                    <div style="margin-bottom: 24px;">
+                        ${last30Days.map(day => {
+                            const statusColors = {
+                                stable: '#00ff88',
+                                alert: '#ffaa00',
+                                breach: '#ff0044'
+                            };
+                            const color = statusColors[day.status];
+
+                            return `
+                                <div style="background: rgba(0,0,0,0.6); padding: 16px; margin-bottom: 8px; border-left: 4px solid ${color}; border-radius: 4px;">
+                                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px;">
+                                        <span style="color: ${color}; font-weight: bold; font-size: 13px;">
+                                            ${day.date}
+                                        </span>
+                                        <span style="color: #00ff88; font-size: 12px;">+${day.xp} XP</span>
+                                    </div>
+                                    <div style="font-size: 11px; color: rgba(255,255,255,0.6);">
+                                        TikTok: ${day.stats.tiktok}min | IG: ${day.stats.instagram}min |
+                                        Roblox: ${day.stats.roblox || 0}min | Desbloqueos: ${day.stats.unlocks}
+                                    </div>
+                                </div>
+                            `;
+                        }).join('')}
+                    </div>
+
+                    <div style="background: rgba(0,0,0,0.8); padding: 20px; border: 1px solid rgba(255,255,255,0.1); border-radius: 4px;">
+                        <div style="font-size: 12px; letter-spacing: 2px; color: rgba(255,255,255,0.5); margin-bottom: 16px;">
+                            ESTADÍSTICAS GENERALES
+                        </div>
+                        <div style="font-size: 13px; color: rgba(255,255,255,0.8); line-height: 2;">
+                            📊 Total días registrados: <span style="color: #00ff88;">${state.history.length}</span><br/>
+                            🔥 Racha actual: <span style="color: #ffaa00;">${state.streak} días</span><br/>
+                            ✨ Días perfectos: <span style="color: #00ff88;">${state.history.filter(d => d.status === 'stable').length}</span><br/>
+                            ⚠️ Días de alerta: <span style="color: #ffaa00;">${state.history.filter(d => d.status === 'alert').length}</span><br/>
+                            🔴 Días críticos: <span style="color: #ff0044;">${state.history.filter(d => d.status === 'breach').length}</span>
+                        </div>
+                    </div>
+                `}
+            `;
+        }
+
+        function renderStatsView() {
+            const totalXP = state.xp;
+            const avgXPPerDay = state.history.length > 0 ? Math.round(totalXP / state.history.length) : 0;
+            const projectedLevel = state.history.length > 0 ? Math.floor((avgXPPerDay * 90) / CONFIG.XP_PER_LEVEL) : 0;
+
+            return `
+                <button class="back-btn" onclick="changeView('main')">← VOLVER</button>
+
+                <h2 class="view-title" style="color: #00ff88; text-shadow: 0 0 20px rgba(0,255,136,0.5);">
+                    ■ ESTADÍSTICAS ■
+                </h2>
+
+                <div style="background: rgba(0,0,0,0.8); padding: 20px; border: 1px solid rgba(0,255,136,0.3); margin-bottom: 16px; border-radius: 4px;">
+                    <div style="font-size: 13px; letter-spacing: 2px; color: #00ff88; margin-bottom: 16px; text-align: center;">
+                        PROGRESO ACTUAL
+                    </div>
+                    <div style="font-size: 24px; color: #fff; text-align: center; margin-bottom: 8px;">
+                        NIVEL ${state.level}
+                    </div>
+                    <div style="font-size: 14px; color: rgba(255,255,255,0.6); text-align: center;">
+                        ${state.xp.toLocaleString()} XP totales
+                    </div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.8); padding: 20px; border: 1px solid rgba(255,170,0,0.3); margin-bottom: 16px; border-radius: 4px;">
+                    <div style="font-size: 13px; letter-spacing: 2px; color: #ffaa00; margin-bottom: 16px; text-align: center;">
+                        PROYECCIÓN
+                    </div>
+                    <div style="font-size: 13px; color: rgba(255,255,255,0.8); line-height: 2;">
+                        📈 XP promedio por día: <span style="color: #00ff88;">${avgXPPerDay}</span><br/>
+                        🎯 Nivel proyectado a 90 días: <span style="color: ${projectedLevel >= CONFIG.TARGET_LEVEL ? '#00ff88' : '#ffaa00'};">${projectedLevel}</span><br/>
+                        ${projectedLevel >= CONFIG.TARGET_LEVEL
+                            ? '✅ <span style="color: #00ff88;">¡VAS POR BUEN CAMINO!</span>'
+                            : `⚠️ <span style="color: #ffaa00;">Necesitas ${Math.ceil((CONFIG.TARGET_LEVEL * CONFIG.XP_PER_LEVEL - avgXPPerDay * 90) / 90)} XP más por día</span>`}
+                    </div>
+                </div>
+
+                <div style="background: rgba(0,0,0,0.8); padding: 20px; border: 1px solid rgba(255,0,100,0.3); border-radius: 4px;">
+                    <div style="font-size: 13px; letter-spacing: 2px; color: #ff3366; margin-bottom: 16px; text-align: center;">
+                        LÍMITES
+                    </div>
+                    <div style="font-size: 12px; color: rgba(255,255,255,0.8); line-height: 2;">
+                        📱 TikTok: máximo <span style="color: #ff006e;">${state.limits.tiktok} minutos/día</span><br/>
+                        📸 Instagram: máximo <span style="color: #00d4ff;">${state.limits.instagram} minutos/día</span><br/>
+                        🎮 Roblox: máximo <span style="color: #ffa500;">${state.limits.roblox} minutos/semana</span> (~2 partidas)<br/>
+                        🔓 Desbloqueos: máximo <span style="color: #00ff88;">${state.limits.unlocks}/día</span><br/><br/>
+                        <span style="font-size: 10px; color: rgba(255,255,255,0.5); font-style: italic;">
+                        Mantente dentro de los límites para ganar XP máximo cada día
+                        </span>
+                    </div>
+                </div>
+            `;
+        }
+
+        function showCelebration(title, message) {
+            const modal = `
+                <div class="modal-overlay" id="celebration">
+                    <div class="modal-content" style="border: 2px solid #00ff88; box-shadow: 0 0 40px rgba(0,255,136,0.5);">
+                        <div class="corner tl"></div>
+                        <div class="corner tr"></div>
+                        <div class="corner bl"></div>
+                        <div class="corner br"></div>
+
+                        <div style="font-size: 32px; margin-bottom: 16px; animation: celebration 0.5s;">
+                            ✨
+                        </div>
+                        <div style="font-size: 16px; letter-spacing: 3px; color: #00ff88; margin-bottom: 12px; text-shadow: 0 0 20px #00ff88;">
+                            ${title}
+                        </div>
+                        <div style="font-size: 13px; color: rgba(255,255,255,0.8); margin-bottom: 24px; line-height: 1.6;">
+                            ${message}
+                        </div>
+                        <button class="btn-confirm" style="width: 100%; padding: 14px;" onclick="closeCelebration()">
+                            CONTINUAR
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            document.body.insertAdjacentHTML('beforeend', modal);
+        }
+
+        function closeCelebration() {
+            const modal = document.getElementById('celebration');
+            if (modal) modal.remove();
+        }
+
+        // Event handlers
+        function changeView(view) {
+            state.currentView = view;
+            render();
+            window.scrollTo(0, 0);
+        }
+
+        // Main render
+        function render() {
+            const app = document.getElementById('app');
+            let content = '';
+
+            if (state.currentView === 'main') {
+                content = renderMainView();
+            } else if (state.currentView === 'achievements') {
+                content = renderAchievementsView();
+            } else if (state.currentView === 'history') {
+                content = renderHistoryView();
+            } else if (state.currentView === 'stats') {
+                content = renderStatsView();
+            }
+
+            app.innerHTML = content;
+            saveState();
+        }
+
+        // Persistence
+        function saveState() {
+            try {
+                localStorage.setItem('level11_full', JSON.stringify(state));
+            } catch (e) {
+                console.error('Error saving state:', e);
+            }
+        }
+
+        function loadState() {
+            try {
+                const saved = localStorage.getItem('level11_full');
+                if (saved) {
+                    const loaded = JSON.parse(saved);
+                    Object.assign(state, loaded);
+
+                    const today = getTodayKey();
+                    const lastDay = state.history.length > 0 ? state.history[state.history.length - 1].date : null;
+
+                    if (lastDay !== today) {
+                        state.todayCheckedIn = false;
+                        state.todayStats = { tiktok: 0, instagram: 0, roblox: 0, unlocks: 0 };
+                    }
+                }
+
+                if (!state.achievements.first_login) {
+                    state.achievements.first_login = true;
+                    saveState();
+                }
+            } catch (e) {
+                console.error('Error loading state:', e);
+            }
+        }
+
+        // Effects
+        function triggerGlitch() {
+            const title = document.getElementById('headerTitle');
+            if (title && Math.random() > 0.95) {
+                title.classList.add('glitch');
+                setTimeout(() => title.classList.remove('glitch'), 150);
+            }
+        }
+
+        // Initialize
+        function init() {
+            loadState();
+            render();
+
+            // Hide loading screen
+            setTimeout(() => {
+                const loading = document.getElementById('loading');
+                if (loading) {
+                    loading.style.opacity = '0';
+                    setTimeout(() => loading.remove(), 300);
+                }
+            }, 500);
+
+            setInterval(triggerGlitch, 2000);
+        }
+
+        // Start app
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+    </script>
+</body>
+</html>
