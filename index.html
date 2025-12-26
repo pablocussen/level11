@@ -564,10 +564,42 @@
             to { transform: rotate(360deg); }
         }
 
+        /* Mobile UX Optimizations */
+        html {
+            scroll-behavior: smooth;
+            -webkit-overflow-scrolling: touch;
+            -webkit-tap-highlight-color: rgba(170,102,255,0.3);
+        }
+
+        /* Prevent zoom on input focus (mobile) */
+        input, select, textarea, button {
+            font-size: 16px;
+        }
+
+        /* Better touch targets */
+        button, .btn-submit, .nav-btn, .back-btn {
+            min-height: 44px;
+            min-width: 44px;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .checkin-input {
+            min-height: 44px;
+            touch-action: manipulation;
+        }
+
+        /* Smooth transitions for mobile */
+        * {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
         /* Responsive */
         @media (max-width: 600px) {
             .container {
-                padding: 16px;
+                padding: 12px;
+                padding-bottom: 40px;
             }
 
             .header-title {
@@ -575,17 +607,127 @@
                 letter-spacing: 4px;
             }
 
+            .progress-card {
+                padding: 16px;
+            }
+
             .progress-stats {
                 font-size: 10px;
+                gap: 6px;
             }
 
             .nav-grid {
-                gap: 8px;
+                gap: 10px;
+                margin: 16px 0;
             }
 
             .nav-btn {
-                padding: 16px 8px;
+                padding: 20px 12px;
+                font-size: 11px;
+                min-height: 60px;
+            }
+
+            .nav-icon {
+                font-size: 20px;
+                margin-bottom: 6px;
+            }
+
+            .daily-checkin {
+                padding: 16px;
+            }
+
+            .checkin-input {
+                width: 70px;
+                padding: 12px 8px;
+                font-size: 16px;
+            }
+
+            .btn-submit {
+                width: 100%;
+                padding: 16px 24px;
+                font-size: 14px;
+                letter-spacing: 2px;
+            }
+
+            .achievement-item {
+                padding: 14px;
+            }
+
+            .achievement-icon {
+                font-size: 28px;
+                width: 50px;
+                height: 50px;
+            }
+
+            .history-item {
+                padding: 14px;
+            }
+
+            .stat-card {
+                padding: 14px;
+            }
+
+            /* Daily Challenge mobile optimizations */
+            .daily-challenge-box {
+                padding: 14px;
+            }
+
+            .daily-challenge-box button {
+                padding: 14px 12px;
+                font-size: 14px;
+                min-height: 48px;
+            }
+
+            .daily-challenge-box input {
+                padding: 14px 12px;
+                font-size: 16px;
+                min-height: 48px;
+            }
+
+            /* Memory pattern buttons */
+            #pattern-buttons button {
+                font-size: 28px;
+                padding: 16px 20px;
+                margin: 6px;
+                min-width: 60px;
+                min-height: 60px;
+            }
+        }
+
+        /* Extra small screens */
+        @media (max-width: 400px) {
+            .container {
+                padding: 10px;
+            }
+
+            .header-title {
+                font-size: 24px;
+                letter-spacing: 3px;
+            }
+
+            .progress-stats {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .nav-btn {
+                padding: 18px 8px;
                 font-size: 10px;
+            }
+
+            .checkin-input {
+                width: 60px;
+            }
+        }
+
+        /* Landscape mobile */
+        @media (max-width: 900px) and (orientation: landscape) {
+            .container {
+                max-width: 800px;
+            }
+
+            .nav-grid {
+                grid-template-columns: repeat(3, 1fr);
             }
         }
 
@@ -619,7 +761,7 @@
             TARGET_LEVEL: 75,
             XP_PER_LEVEL: 100,
             SECRET_CODE: "1983HAWKINS",
-            VERSION: "1.1.0"
+            VERSION: "2.0.0"
         };
 
         // Sound System (Web Audio API - No external files needed)
@@ -712,6 +854,12 @@
             history: [],
             weeklyRoblox: 0,
             currentWeek: getCurrentWeek(),
+            dailyChallenge: {
+                completed: false,
+                bonusMinutes: 0,
+                attempts: 3,
+                lastDate: null
+            },
             achievements: {
                 first_login: false,
                 streak_3: false,
@@ -738,6 +886,66 @@
                 roblox: 120,
                 unlocks: 50
             }
+        };
+
+        // Daily Challenges Database
+        const DAILY_CHALLENGES = {
+            animal_trivia: [
+                { q: '¿Cuál es el animal más rápido del mundo?', options: ['León', 'Guepardo', 'Halcón peregrino', 'Tiburón'], answer: 2 },
+                { q: '¿Qué animal puede dormir de pie?', options: ['Elefante', 'Caballo', 'Jirafa', 'Vaca'], answer: 1 },
+                { q: '¿Cuántos corazones tiene un pulpo?', options: ['1', '2', '3', '5'], answer: 2 },
+                { q: '¿Qué animal es el más grande del planeta?', options: ['Elefante africano', 'Ballena azul', 'Tiburón ballena', 'Jirafa'], answer: 1 },
+                { q: '¿Los delfines duermen con un ojo abierto?', options: ['Sí', 'No'], answer: 0 },
+                { q: '¿Qué animal tiene la lengua más larga?', options: ['Oso hormiguero', 'Jirafa', 'Camaleón', 'Serpiente'], answer: 1 },
+                { q: '¿Las mariposas pueden probar con sus patas?', options: ['Sí', 'No'], answer: 0 }
+            ],
+            math_quick: [
+                { q: '¿Cuánto es 15 × 4?', answer: '60' },
+                { q: '¿Cuánto es 144 ÷ 12?', answer: '12' },
+                { q: '¿Cuánto es 25 + 37?', answer: '62' },
+                { q: '¿Cuánto es 100 - 48?', answer: '52' },
+                { q: '¿Cuánto es 8 × 9?', answer: '72' },
+                { q: '¿Cuánto es 56 ÷ 7?', answer: '8' },
+                { q: '¿Cuánto es 33 + 29?', answer: '62' }
+            ],
+            riddles: [
+                { q: 'Blanca por dentro, verde por fuera. Si quieres que te lo diga, espera.', answer: 'pera' },
+                { q: 'Tengo agujas pero no coso, tengo números pero no cuento. ¿Qué soy?', answer: 'reloj' },
+                { q: 'Cuanto más seca, más se moja. ¿Qué es?', answer: 'toalla' },
+                { q: 'Oro parece, plata no es. ¿Qué es?', answer: 'platano' },
+                { q: 'Vuelo de noche, duermo de día, y nunca verás plumas en ala mía.', answer: 'murcielago' },
+                { q: 'Tiene dientes pero no muerde. ¿Qué es?', answer: 'peine' },
+                { q: 'Choco con la pared y reboto. ¿Qué soy?', answer: 'pelota' }
+            ],
+            universe_trivia: [
+                { q: '¿Cuántos planetas hay en el sistema solar?', options: ['7', '8', '9', '10'], answer: 1 },
+                { q: '¿Cuál es el planeta más grande?', options: ['Saturno', 'Neptuno', 'Júpiter', 'Urano'], answer: 2 },
+                { q: '¿Qué planeta es conocido como el planeta rojo?', options: ['Venus', 'Marte', 'Mercurio', 'Júpiter'], answer: 1 },
+                { q: '¿La Tierra gira alrededor del Sol o el Sol alrededor de la Tierra?', options: ['Tierra alrededor del Sol', 'Sol alrededor de la Tierra'], answer: 0 },
+                { q: '¿Cuánto tarda la luz del Sol en llegar a la Tierra?', options: ['8 segundos', '8 minutos', '8 horas', '8 días'], answer: 1 },
+                { q: '¿Qué hay más en el universo?', options: ['Estrellas', 'Planetas', 'Galaxias', 'Lunas'], answer: 0 },
+                { q: '¿Los anillos de Saturno están hechos de...?', options: ['Gas', 'Roca', 'Hielo y roca', 'Polvo'], answer: 2 }
+            ],
+            word_scramble: [
+                { q: 'Desordena esta palabra: ELEFANTE', scrambled: 'TEENFALE', answer: 'elefante' },
+                { q: 'Desordena esta palabra: COMPUTADORA', scrambled: 'ROADATUPCOM', answer: 'computadora' },
+                { q: 'Desordena esta palabra: MARIPOSA', scrambled: 'SOAMIRAP', answer: 'mariposa' },
+                { q: 'Desordena esta palabra: TELEFONO', scrambled: 'NOFOTELE', answer: 'telefono' },
+                { q: 'Desordena esta palabra: CHOCOLATE', scrambled: 'TEOCOHACL', answer: 'chocolate' }
+            ],
+            memory_pattern: [
+                { pattern: ['🔴', '🔵', '🟢'], length: 3 },
+                { pattern: ['🔴', '🔵', '🔴', '🟢'], length: 4 },
+                { pattern: ['🔵', '🟢', '🔴', '🔵', '🟢'], length: 5 },
+                { pattern: ['🟢', '🔴', '🔵', '🔴', '🟢', '🔵'], length: 6 }
+            ],
+            quick_trivia: [
+                { q: '¿Cuál es la capital de Francia?', options: ['Londres', 'Berlín', 'París', 'Madrid'], answer: 2 },
+                { q: '¿Cuántos continentes hay?', options: ['5', '6', '7', '8'], answer: 2 },
+                { q: '¿El agua hierve a...?', options: ['50°C', '100°C', '150°C', '200°C'], answer: 1 },
+                { q: '¿Cuántos días tiene un año?', options: ['360', '365', '366', '370'], answer: 1 },
+                { q: '¿De qué color es el cielo en un día despejado?', options: ['Verde', 'Rojo', 'Azul', 'Amarillo'], answer: 2 }
+            ]
         };
 
         // Motivational messages
@@ -784,9 +992,10 @@
         }
 
         function getDayStatus() {
+            const bonusMinutes = state.dailyChallenge.bonusMinutes || 0;
             const statuses = [
-                getStatus(state.todayStats.tiktok, state.limits.tiktok),
-                getStatus(state.todayStats.instagram, state.limits.instagram),
+                getStatus(state.todayStats.tiktok, state.limits.tiktok + bonusMinutes),
+                getStatus(state.todayStats.instagram, state.limits.instagram + bonusMinutes),
                 getStatus(state.weeklyRoblox, state.limits.roblox),
                 getStatus(state.todayStats.unlocks, state.limits.unlocks)
             ];
@@ -803,21 +1012,101 @@
             }[status];
         }
 
+        // Daily Challenge Functions
+        function getDailyChallengeType() {
+            const types = ['animal_trivia', 'math_quick', 'riddles', 'universe_trivia', 'word_scramble', 'memory_pattern', 'quick_trivia'];
+            const today = new Date();
+            const dayIndex = Math.floor((today - CONFIG.START_DATE) / (1000 * 60 * 60 * 24));
+            return types[dayIndex % types.length];
+        }
+
+        function getTodayChallenge() {
+            const challengeType = getDailyChallengeType();
+            const challenges = DAILY_CHALLENGES[challengeType];
+            const today = new Date();
+            const dayIndex = Math.floor((today - CONFIG.START_DATE) / (1000 * 60 * 60 * 24));
+            const challengeIndex = dayIndex % challenges.length;
+            return {
+                type: challengeType,
+                data: challenges[challengeIndex]
+            };
+        }
+
+        function resetDailyChallengeIfNeeded() {
+            const todayKey = getTodayKey();
+            if (state.dailyChallenge.lastDate !== todayKey) {
+                state.dailyChallenge.completed = false;
+                state.dailyChallenge.bonusMinutes = 0;
+                state.dailyChallenge.attempts = 3;
+                state.dailyChallenge.lastDate = todayKey;
+                saveState();
+            }
+        }
+
+        function checkChallengeAnswer(answer) {
+            if (state.dailyChallenge.completed || state.dailyChallenge.attempts <= 0) {
+                return { success: false, message: 'Ya no hay intentos disponibles' };
+            }
+
+            const challenge = getTodayChallenge();
+            let isCorrect = false;
+
+            if (challenge.type === 'animal_trivia' || challenge.type === 'universe_trivia' || challenge.type === 'quick_trivia') {
+                isCorrect = parseInt(answer) === challenge.data.answer;
+            } else if (challenge.type === 'math_quick' || challenge.type === 'riddles' || challenge.type === 'word_scramble') {
+                isCorrect = answer.toLowerCase().trim() === challenge.data.answer.toLowerCase().trim();
+            } else if (challenge.type === 'memory_pattern') {
+                isCorrect = answer === challenge.data.pattern.join(',');
+            }
+
+            state.dailyChallenge.attempts--;
+
+            if (isCorrect) {
+                state.dailyChallenge.completed = true;
+                state.dailyChallenge.bonusMinutes = 10;
+                SoundSystem.play('achievement');
+                saveState();
+                return {
+                    success: true,
+                    message: '¡CORRECTO! 🎉 Ganaste +10 minutos extra para hoy',
+                    bonusMinutes: 10
+                };
+            } else {
+                saveState();
+                if (state.dailyChallenge.attempts > 0) {
+                    return {
+                        success: false,
+                        message: `Incorrecto. Te quedan ${state.dailyChallenge.attempts} intentos.`
+                    };
+                } else {
+                    return {
+                        success: false,
+                        message: 'Se acabaron los intentos. Inténtalo mañana.'
+                    };
+                }
+            }
+        }
+
         function calculateXP(stats) {
             let xp = 0;
 
-            if (stats.tiktok <= state.limits.tiktok) xp += 30;
-            if (stats.instagram <= state.limits.instagram) xp += 30;
+            // Apply bonus minutes from Daily Challenge
+            const bonusMinutes = state.dailyChallenge.bonusMinutes || 0;
+            const tiktokLimit = state.limits.tiktok + bonusMinutes;
+            const instagramLimit = state.limits.instagram + bonusMinutes;
+
+            if (stats.tiktok <= tiktokLimit) xp += 30;
+            if (stats.instagram <= instagramLimit) xp += 30;
             if (state.weeklyRoblox <= state.limits.roblox) xp += 30;
             if (stats.unlocks <= state.limits.unlocks) xp += 10;
 
-            if (stats.tiktok <= state.limits.tiktok * 0.5) xp += 20;
-            if (stats.instagram <= state.limits.instagram * 0.5) xp += 20;
+            if (stats.tiktok <= tiktokLimit * 0.5) xp += 20;
+            if (stats.instagram <= instagramLimit * 0.5) xp += 20;
             if (state.weeklyRoblox <= state.limits.roblox * 0.5) xp += 20;
 
             if (getDayStatus() === 'stable' &&
-                stats.tiktok <= state.limits.tiktok * 0.7 &&
-                stats.instagram <= state.limits.instagram * 0.7 &&
+                stats.tiktok <= tiktokLimit * 0.7 &&
+                stats.instagram <= instagramLimit * 0.7 &&
                 state.weeklyRoblox <= state.limits.roblox * 0.7) {
                 xp += 50;
             }
@@ -995,6 +1284,9 @@
                 `;
             }
 
+            const bonusMinutes = state.dailyChallenge.bonusMinutes || 0;
+            const bonusText = bonusMinutes > 0 ? ` <span style="color: #00ff88;">+${bonusMinutes} 🎉</span>` : '';
+
             return `
                 <div class="daily-checkin">
                     <div class="checkin-title">◈ CHECK-IN DIARIO ◈</div>
@@ -1006,7 +1298,7 @@
                         <div class="checkin-label">
                             <span style="color: #ff006e;">▶</span> TikTok (minutos hoy):
                             <input type="number" id="input-tiktok" class="checkin-input" min="0" max="999" value="0" />
-                            <span style="font-size: 10px; color: rgba(255,255,255,0.4);">/ ${state.limits.tiktok} diario</span>
+                            <span style="font-size: 10px; color: rgba(255,255,255,0.4);">/ ${state.limits.tiktok}${bonusText} diario</span>
                         </div>
                     </div>
 
@@ -1014,7 +1306,7 @@
                         <div class="checkin-label">
                             <span style="color: #00d4ff;">◎</span> Instagram (minutos hoy):
                             <input type="number" id="input-instagram" class="checkin-input" min="0" max="999" value="0" />
-                            <span style="font-size: 10px; color: rgba(255,255,255,0.4);">/ ${state.limits.instagram} diario</span>
+                            <span style="font-size: 10px; color: rgba(255,255,255,0.4);">/ ${state.limits.instagram}${bonusText} diario</span>
                         </div>
                     </div>
 
@@ -1045,6 +1337,220 @@
                     </div>
                 </div>
             `;
+        }
+
+        function renderDailyChallenge() {
+            resetDailyChallengeIfNeeded();
+            const challenge = getTodayChallenge();
+            const challengeNames = {
+                animal_trivia: '🦁 Trivia de Animales',
+                math_quick: '🧮 Matemáticas Rápidas',
+                riddles: '🤔 Adivinanza',
+                universe_trivia: '🌌 Trivia del Universo',
+                word_scramble: '🔤 Palabra Desordenada',
+                memory_pattern: '🧠 Memoria de Patrones',
+                quick_trivia: '⚡ Trivia Rápida'
+            };
+
+            if (state.dailyChallenge.completed) {
+                return `
+                    <div class="daily-challenge-box completed" style="
+                        border: 1px solid #00ff8833;
+                        background: rgba(0,255,136,0.05);
+                        padding: 16px;
+                        margin: 16px 0;
+                        border-radius: 8px;
+                    ">
+                        <div style="font-size: 12px; color: #00ff88; font-weight: bold; margin-bottom: 8px;">
+                            ✓ DESAFÍO COMPLETADO
+                        </div>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.6);">
+                            Ganaste +10 minutos extra para hoy 🎉
+                        </div>
+                    </div>
+                `;
+            }
+
+            if (state.dailyChallenge.attempts <= 0) {
+                return `
+                    <div class="daily-challenge-box failed" style="
+                        border: 1px solid rgba(255,255,255,0.1);
+                        background: rgba(0,0,0,0.6);
+                        padding: 16px;
+                        margin: 16px 0;
+                        border-radius: 8px;
+                    ">
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.5); font-weight: bold; margin-bottom: 8px;">
+                            DESAFÍO DIARIO
+                        </div>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.4);">
+                            Sin intentos disponibles. Vuelve mañana.
+                        </div>
+                    </div>
+                `;
+            }
+
+            let challengeHTML = '';
+
+            if (challenge.type === 'animal_trivia' || challenge.type === 'universe_trivia' || challenge.type === 'quick_trivia') {
+                challengeHTML = `
+                    <div style="font-size: 13px; color: #fff; margin-bottom: 16px; line-height: 1.4;">
+                        ${challenge.data.q}
+                    </div>
+                    ${challenge.data.options.map((opt, idx) => `
+                        <button onclick="submitChallengeAnswer(${idx})" style="
+                            width: 100%;
+                            padding: 12px;
+                            margin: 6px 0;
+                            background: rgba(255,255,255,0.05);
+                            border: 1px solid rgba(255,255,255,0.2);
+                            color: #fff;
+                            font-family: 'Courier New', monospace;
+                            font-size: 12px;
+                            cursor: pointer;
+                            border-radius: 4px;
+                            transition: all 0.3s;
+                            text-align: left;
+                        " onmouseover="this.style.background='rgba(170,102,255,0.2)'; this.style.borderColor='#aa66ff'"
+                           onmouseout="this.style.background='rgba(255,255,255,0.05)'; this.style.borderColor='rgba(255,255,255,0.2)'">
+                            ${String.fromCharCode(65 + idx)}. ${opt}
+                        </button>
+                    `).join('')}
+                `;
+            } else if (challenge.type === 'math_quick' || challenge.type === 'riddles' || challenge.type === 'word_scramble') {
+                const displayText = challenge.type === 'word_scramble'
+                    ? `${challenge.data.q}<br/><span style="color: #aa66ff; font-size: 16px; letter-spacing: 3px;">${challenge.data.scrambled}</span>`
+                    : challenge.data.q;
+
+                challengeHTML = `
+                    <div style="font-size: 13px; color: #fff; margin-bottom: 16px; line-height: 1.4;">
+                        ${displayText}
+                    </div>
+                    <input type="text" id="challenge-answer" placeholder="Escribe tu respuesta..." style="
+                        width: 100%;
+                        padding: 12px;
+                        background: rgba(0,0,0,0.6);
+                        border: 1px solid rgba(255,255,255,0.3);
+                        color: #fff;
+                        font-family: 'Courier New', monospace;
+                        font-size: 14px;
+                        border-radius: 4px;
+                        margin-bottom: 12px;
+                    " />
+                    <button onclick="submitChallengeAnswerText()" style="
+                        width: 100%;
+                        padding: 12px;
+                        background: rgba(170,102,255,0.2);
+                        border: 1px solid #aa66ff;
+                        color: #aa66ff;
+                        font-family: 'Courier New', monospace;
+                        font-size: 12px;
+                        font-weight: bold;
+                        cursor: pointer;
+                        border-radius: 4px;
+                        transition: all 0.3s;
+                    " onmouseover="this.style.background='rgba(170,102,255,0.3)'"
+                       onmouseout="this.style.background='rgba(170,102,255,0.2)'">
+                        ✓ ENVIAR RESPUESTA
+                    </button>
+                `;
+            } else if (challenge.type === 'memory_pattern') {
+                challengeHTML = `
+                    <div style="font-size: 13px; color: #fff; margin-bottom: 16px;">
+                        Memoriza este patrón (desaparecerá en 5 segundos):
+                    </div>
+                    <div id="memory-pattern" style="font-size: 32px; text-align: center; margin: 20px 0;">
+                        ${challenge.data.pattern.join(' ')}
+                    </div>
+                    <div id="memory-input" style="display: none;">
+                        <div style="font-size: 12px; color: rgba(255,255,255,0.6); margin-bottom: 12px;">
+                            Reproduce el patrón:
+                        </div>
+                        <div id="pattern-buttons" style="text-align: center; margin-bottom: 16px;">
+                            <button onclick="addToPattern('🔴')" style="font-size: 24px; padding: 12px 16px; margin: 4px; background: rgba(255,0,0,0.2); border: 1px solid #ff0000; border-radius: 50%; cursor: pointer;">🔴</button>
+                            <button onclick="addToPattern('🔵')" style="font-size: 24px; padding: 12px 16px; margin: 4px; background: rgba(0,0,255,0.2); border: 1px solid #0000ff; border-radius: 50%; cursor: pointer;">🔵</button>
+                            <button onclick="addToPattern('🟢')" style="font-size: 24px; padding: 12px 16px; margin: 4px; background: rgba(0,255,0,0.2); border: 1px solid #00ff00; border-radius: 50%; cursor: pointer;">🟢</button>
+                        </div>
+                        <div id="user-pattern" style="font-size: 24px; text-align: center; margin: 16px 0; min-height: 40px; color: #aa66ff;"></div>
+                        <button onclick="clearPattern()" style="padding: 8px 16px; margin-right: 8px; background: rgba(255,0,0,0.2); border: 1px solid #ff0000; color: #ff0000; font-size: 10px; border-radius: 4px; cursor: pointer;">LIMPIAR</button>
+                        <button onclick="submitMemoryPattern()" style="padding: 12px; width: calc(100% - 100px); background: rgba(170,102,255,0.2); border: 1px solid #aa66ff; color: #aa66ff; font-weight: bold; font-size: 12px; border-radius: 4px; cursor: pointer;">✓ ENVIAR</button>
+                    </div>
+                    <script>
+                        setTimeout(() => {
+                            document.getElementById('memory-pattern').style.display = 'none';
+                            document.getElementById('memory-input').style.display = 'block';
+                        }, 5000);
+                    </script>
+                `;
+            }
+
+            return `
+                <div class="daily-challenge-box" style="
+                    border: 1px solid #aa66ff33;
+                    background: rgba(170,102,255,0.05);
+                    padding: 16px;
+                    margin: 16px 0;
+                    border-radius: 8px;
+                    box-shadow: 0 0 20px rgba(170,102,255,0.2);
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                        <div style="font-size: 13px; color: #aa66ff; font-weight: bold;">
+                            ${challengeNames[challenge.type]}
+                        </div>
+                        <div style="font-size: 10px; color: rgba(255,255,255,0.5);">
+                            Intentos: ${state.dailyChallenge.attempts}/3
+                        </div>
+                    </div>
+                    <div style="font-size: 10px; color: rgba(255,255,255,0.5); margin-bottom: 16px;">
+                        Completa el desafío y gana +10 minutos extra
+                    </div>
+                    ${challengeHTML}
+                    <div id="challenge-feedback" style="margin-top: 12px; font-size: 11px; text-align: center;"></div>
+                </div>
+            `;
+        }
+
+        let userPattern = [];
+        function addToPattern(emoji) {
+            userPattern.push(emoji);
+            document.getElementById('user-pattern').textContent = userPattern.join(' ');
+        }
+
+        function clearPattern() {
+            userPattern = [];
+            document.getElementById('user-pattern').textContent = '';
+        }
+
+        function submitMemoryPattern() {
+            const result = checkChallengeAnswer(userPattern.join(','));
+            showChallengeFeedback(result);
+        }
+
+        function submitChallengeAnswer(answerIndex) {
+            const result = checkChallengeAnswer(answerIndex);
+            showChallengeFeedback(result);
+        }
+
+        function submitChallengeAnswerText() {
+            const answer = document.getElementById('challenge-answer').value;
+            const result = checkChallengeAnswer(answer);
+            showChallengeFeedback(result);
+        }
+
+        function showChallengeFeedback(result) {
+            const feedback = document.getElementById('challenge-feedback');
+            if (feedback) {
+                feedback.innerHTML = `
+                    <div style="padding: 12px; background: rgba(${result.success ? '0,255,136' : '255,0,68'},0.1);
+                                border: 1px solid ${result.success ? '#00ff88' : '#ff0044'};
+                                border-radius: 4px; color: ${result.success ? '#00ff88' : '#ff0044'};">
+                        ${result.message}
+                    </div>
+                `;
+                setTimeout(() => {
+                    render();
+                }, 2000);
+            }
         }
 
         function renderMainView() {
@@ -1092,6 +1598,8 @@
                         <span>SIGUIENTE: <span style="color: #ff3366;">${xpForNextLevel} XP</span></span>
                     </div>
                 </div>
+
+                ${renderDailyChallenge()}
 
                 ${renderDailyCheckin()}
 
