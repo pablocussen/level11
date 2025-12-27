@@ -2010,24 +2010,11 @@
 
             setInterval(triggerGlitch, 2000);
 
-            // Request notification permission and schedule reminders
+            // Request notification permission (optional)
             if ('Notification' in window && Notification.permission === 'default') {
                 setTimeout(() => {
-                    Notification.requestPermission().then(permission => {
-                        if (permission === 'granted') {
-                            scheduleDailyReminder();
-                            // Show challenge notification after 5 minutes if not completed
-                            setTimeout(() => {
-                                showDailyChallengeNotification();
-                            }, 5 * 60 * 1000);
-                        }
-                    });
+                    Notification.requestPermission();
                 }, 2000);
-            } else if (Notification.permission === 'granted') {
-                scheduleDailyReminder();
-                setTimeout(() => {
-                    showDailyChallengeNotification();
-                }, 5 * 60 * 1000);
             }
         }
 
