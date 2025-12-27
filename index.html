@@ -761,7 +761,7 @@
             TARGET_LEVEL: 75,
             XP_PER_LEVEL: 100,
             SECRET_CODE: "1983HAWKINS",
-            VERSION: "2.0.0"
+            VERSION: "2.1.0"
         };
 
         // Sound System (Web Audio API - No external files needed)
@@ -1120,6 +1120,7 @@
             if (newLevel > state.level) {
                 state.level = newLevel;
                 SoundSystem.play('levelUp');
+                vibrate([100, 50, 100, 50, 200]); // Level up celebration pattern
                 checkAchievements();
                 showCelebration(`¡SUBISTE A NIVEL ${state.level}!`, `Ganaste +${(newLevel - state.level) * 100} XP`);
                 return true;
@@ -1154,6 +1155,7 @@
                     const achievement = getAchievementData(key);
                     setTimeout(() => {
                         SoundSystem.play('achievement');
+                        vibrate([50, 30, 50, 30, 50]); // Achievement unlock pattern
                         showCelebration(`¡LOGRO DESBLOQUEADO!`, achievement.name);
                     }, 500);
                 }
@@ -1162,6 +1164,7 @@
             // Play streak sound if streak increased
             if (state.streak > 0 && state.streak !== oldAchievements.streak) {
                 SoundSystem.play('streak');
+                vibrate([30, 20, 30]); // Streak celebration
             }
         }
 
@@ -1235,13 +1238,16 @@
             checkAchievements();
             saveState();
 
-            // Play sounds based on day status
+            // Play sounds and haptic feedback based on day status
             if (dayStatus === 'stable') {
                 SoundSystem.play('success');
+                vibrate([70, 30, 100]); // Perfect day pattern
             } else if (dayStatus === 'breach') {
                 SoundSystem.play('warning');
+                vibrate([200]); // Warning buzz
             } else {
                 SoundSystem.play('click');
+                vibrate(50); // Gentle confirmation
             }
 
             showCelebration(
@@ -1537,13 +1543,28 @@
             showChallengeFeedback(result);
         }
 
+        // Haptic Feedback for Mobile
+        function vibrate(pattern) {
+            if ('vibrate' in navigator) {
+                navigator.vibrate(pattern);
+            }
+        }
+
         function showChallengeFeedback(result) {
             const feedback = document.getElementById('challenge-feedback');
             if (feedback) {
+                // Haptic feedback
+                if (result.success) {
+                    vibrate([50, 30, 50]); // Success pattern: buzz-pause-buzz
+                } else {
+                    vibrate(100); // Error: single buzz
+                }
+
                 feedback.innerHTML = `
                     <div style="padding: 12px; background: rgba(${result.success ? '0,255,136' : '255,0,68'},0.1);
                                 border: 1px solid ${result.success ? '#00ff88' : '#ff0044'};
-                                border-radius: 4px; color: ${result.success ? '#00ff88' : '#ff0044'};">
+                                border-radius: 4px; color: ${result.success ? '#00ff88' : '#ff0044'};
+                                animation: slideUp 0.3s ease-out;">
                         ${result.message}
                     </div>
                 `;
@@ -1929,6 +1950,46 @@
         }
 
         // Initialize
+        // Daily Reminder Notifications
+        function scheduleDailyReminder() {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                const now = new Date();
+                const reminder = new Date();
+                reminder.setHours(20, 0, 0, 0); // 8 PM reminder
+
+                if (now > reminder) {
+                    reminder.setDate(reminder.getDate() + 1);
+                }
+
+                const timeUntilReminder = reminder - now;
+
+                setTimeout(() => {
+                    if (!state.todayCheckedIn) {
+                        new Notification('🎮 LEVEL:11 - Check-in Diario', {
+                            body: '¡No olvides hacer tu check-in de hoy! 📱',
+                            icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="0.9em" font-size="90">🎮</text></svg>',
+                            badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="0.9em" font-size="90">🎮</text></svg>',
+                            vibrate: [200, 100, 200]
+                        });
+                    }
+                    // Schedule next day
+                    scheduleDailyReminder();
+                }, timeUntilReminder);
+            }
+        }
+
+        function showDailyChallengeNotification() {
+            if ('Notification' in window && Notification.permission === 'granted') {
+                if (!state.dailyChallenge.completed) {
+                    new Notification('🎯 ¡Desafío Diario Disponible!', {
+                        body: '¡Completa el desafío de hoy y gana +10 minutos extra! 🎉',
+                        icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y="0.9em" font-size="90">🎯</text></svg>',
+                        vibrate: [100, 50, 100]
+                    });
+                }
+            }
+        }
+
         function init() {
             SoundSystem.init();
             loadState();
@@ -1945,11 +2006,24 @@
 
             setInterval(triggerGlitch, 2000);
 
-            // Request notification permission
+            // Request notification permission and schedule reminders
             if ('Notification' in window && Notification.permission === 'default') {
                 setTimeout(() => {
-                    Notification.requestPermission();
+                    Notification.requestPermission().then(permission => {
+                        if (permission === 'granted') {
+                            scheduleDailyReminder();
+                            // Show challenge notification after 5 minutes if not completed
+                            setTimeout(() => {
+                                showDailyChallengeNotification();
+                            }, 5 * 60 * 1000);
+                        }
+                    });
                 }, 2000);
+            } else if (Notification.permission === 'granted') {
+                scheduleDailyReminder();
+                setTimeout(() => {
+                    showDailyChallengeNotification();
+                }, 5 * 60 * 1000);
             }
         }
 
