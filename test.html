@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TEST - LEVEL:11</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #0a0a0f;
+            color: white;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .test {
+            text-align: center;
+            padding: 40px;
+            border: 2px solid #00ff88;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="test">
+        <h1>✅ TEST EXITOSO</h1>
+        <p>Si ves esto, GitHub Pages funciona correctamente.</p>
+        <p id="time"></p>
+    </div>
+    <script>
+        document.getElementById('time').textContent = 'Cargado a las: ' + new Date().toLocaleTimeString();
+        console.log('Test page loaded successfully');
+    </script>
+</body>
+</html>
