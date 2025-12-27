@@ -1039,7 +1039,7 @@
                 state.dailyChallenge.bonusMinutes = 0;
                 state.dailyChallenge.attempts = 3;
                 state.dailyChallenge.lastDate = todayKey;
-                saveState();
+                // saveState() is called at the end of render()
             }
         }
 
