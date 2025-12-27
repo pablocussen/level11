@@ -1017,15 +1017,26 @@
             const types = ['animal_trivia', 'math_quick', 'riddles', 'universe_trivia', 'word_scramble', 'memory_pattern', 'quick_trivia'];
             const today = new Date();
             const dayIndex = Math.floor((today - CONFIG.START_DATE) / (1000 * 60 * 60 * 24));
-            return types[dayIndex % types.length];
+            // Use absolute value to handle dates before start
+            return types[Math.abs(dayIndex) % types.length];
         }
 
         function getTodayChallenge() {
             const challengeType = getDailyChallengeType();
             const challenges = DAILY_CHALLENGES[challengeType];
+
+            if (!challenges || !Array.isArray(challenges) || challenges.length === 0) {
+                console.error('Invalid challenge type:', challengeType);
+                return {
+                    type: 'animal_trivia',
+                    data: DAILY_CHALLENGES.animal_trivia[0]
+                };
+            }
+
             const today = new Date();
             const dayIndex = Math.floor((today - CONFIG.START_DATE) / (1000 * 60 * 60 * 24));
-            const challengeIndex = dayIndex % challenges.length;
+            // Use absolute value to handle dates before start
+            const challengeIndex = Math.abs(dayIndex) % challenges.length;
             return {
                 type: challengeType,
                 data: challenges[challengeIndex]
