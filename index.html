@@ -1883,32 +1883,45 @@
 
         // Main render
         function render() {
-            const app = document.getElementById('app');
-            let content = '';
+            try {
+                const app = document.getElementById('app');
+                if (!app) {
+                    console.error('App container not found');
+                    return;
+                }
 
-            if (state.currentView === 'main') {
-                content = renderMainView();
-            } else if (state.currentView === 'achievements') {
-                content = renderAchievementsView();
-            } else if (state.currentView === 'history') {
-                content = renderHistoryView();
-            } else if (state.currentView === 'stats') {
-                content = renderStatsView();
+                let content = '';
+
+                if (state.currentView === 'main') {
+                    content = renderMainView();
+                } else if (state.currentView === 'achievements') {
+                    content = renderAchievementsView();
+                } else if (state.currentView === 'history') {
+                    content = renderHistoryView();
+                } else if (state.currentView === 'stats') {
+                    content = renderStatsView();
+                }
+
+                app.innerHTML = content;
+
+                // Handle memory pattern timer after rendering
+                const memoryPattern = document.getElementById('memory-pattern');
+                const memoryInput = document.getElementById('memory-input');
+                if (memoryPattern && memoryInput) {
+                    setTimeout(() => {
+                        memoryPattern.style.display = 'none';
+                        memoryInput.style.display = 'block';
+                    }, 5000);
+                }
+
+                saveState();
+            } catch (error) {
+                console.error('Error in render():', error);
+                const app = document.getElementById('app');
+                if (app) {
+                    app.innerHTML = '<div style="color: #ff0044; padding: 40px;">Error: ' + error.message + '</div>';
+                }
             }
-
-            app.innerHTML = content;
-
-            // Handle memory pattern timer after rendering
-            const memoryPattern = document.getElementById('memory-pattern');
-            const memoryInput = document.getElementById('memory-input');
-            if (memoryPattern && memoryInput) {
-                setTimeout(() => {
-                    memoryPattern.style.display = 'none';
-                    memoryInput.style.display = 'block';
-                }, 5000);
-            }
-
-            saveState();
         }
 
         // Persistence
@@ -1995,26 +2008,42 @@
         }
 
         function init() {
-            SoundSystem.init();
-            loadState();
-            render();
+            try {
+                console.log('Initializing app...');
+                SoundSystem.init();
+                console.log('Sound system initialized');
 
-            // Hide loading screen
-            setTimeout(() => {
+                loadState();
+                console.log('State loaded');
+
+                render();
+                console.log('First render complete');
+
+                // Hide loading screen
+                setTimeout(() => {
+                    const loading = document.getElementById('loading');
+                    if (loading) {
+                        loading.style.opacity = '0';
+                        setTimeout(() => loading.remove(), 300);
+                    }
+                    console.log('Loading screen hidden');
+                }, 500);
+
+                setInterval(triggerGlitch, 2000);
+
+                // Request notification permission (optional)
+                if ('Notification' in window && Notification.permission === 'default') {
+                    setTimeout(() => {
+                        Notification.requestPermission();
+                    }, 2000);
+                }
+            } catch (error) {
+                console.error('Error during initialization:', error);
+                // Hide loading screen even if there's an error
                 const loading = document.getElementById('loading');
                 if (loading) {
-                    loading.style.opacity = '0';
-                    setTimeout(() => loading.remove(), 300);
+                    loading.innerHTML = '<div style="color: #ff0044; padding: 40px; text-align: center;">ERROR: ' + error.message + '</div>';
                 }
-            }, 500);
-
-            setInterval(triggerGlitch, 2000);
-
-            // Request notification permission (optional)
-            if ('Notification' in window && Notification.permission === 'default') {
-                setTimeout(() => {
-                    Notification.requestPermission();
-                }, 2000);
             }
         }
 
