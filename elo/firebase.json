@@ -8,6 +8,14 @@
     ],
     "rewrites": [
       {
+        "source": "/elo",
+        "destination": "/elo/index.html"
+      },
+      {
+        "source": "/elo/",
+        "destination": "/elo/index.html"
+      },
+      {
         "source": "**",
         "destination": "/index.html"
       }
