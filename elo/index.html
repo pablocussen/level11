@@ -1,0 +1,1302 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0f">
+<link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230a0a0f'/><text x='90' y='125' font-size='100' text-anchor='middle'>🎮</text></svg>">
+<title>Level:11 - Elo & Papá</title>
+<style>
+:root {
+  --bg: #0a0a0f; --bg2: #12121a; --bg3: #1a1a2e;
+  --neon: #00ff41; --neon2: #00d4ff; --neon3: #bf00ff;
+  --pink: #ff0080; --warn: #ff6b35; --danger: #ff073a;
+  --text: #e0e0e0; --text2: #888; --radius: 12px;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', system-ui, sans-serif;
+  background: var(--bg); color: var(--text);
+  min-height: 100vh; min-height: 100dvh; overflow-x: hidden;
+}
+
+/* Loading */
+#loading {
+  position:fixed; inset:0; z-index:9999; background:var(--bg);
+  display:flex; flex-direction:column; align-items:center; justify-content:center;
+  transition: opacity 0.5s;
+}
+#loading.hidden { opacity:0; pointer-events:none; }
+#loading h1 { font-size:2rem; color:var(--neon); margin-bottom:1rem; }
+.spinner {
+  width:40px; height:40px; border:3px solid var(--bg3);
+  border-top-color:var(--neon); border-radius:50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes spin { to { transform:rotate(360deg); } }
+#loading .status { color:var(--text2); font-size:0.85rem; margin-top:1rem; }
+
+/* Setup */
+#setup {
+  display:none; min-height:100vh; min-height:100dvh;
+  padding:2rem 1rem; max-width:420px; margin:0 auto;
+}
+#setup h1 { text-align:center; color:var(--neon); font-size:1.8rem; margin-bottom:0.5rem; }
+#setup .subtitle { text-align:center; color:var(--text2); margin-bottom:2rem; }
+.setup-card {
+  background:var(--bg2); border:1px solid var(--bg3);
+  border-radius:var(--radius); padding:1.5rem; margin-bottom:1rem;
+}
+.setup-card h2 { font-size:1.1rem; margin-bottom:1rem; color:var(--neon2); }
+.setup-card p { color:var(--text2); font-size:0.9rem; margin-bottom:1rem; }
+
+/* Buttons */
+.btn {
+  display:block; width:100%; padding:14px; border:none; border-radius:var(--radius);
+  font-size:1rem; font-weight:600; cursor:pointer; transition:all 0.2s; text-align:center;
+}
+.btn-neon { background:var(--neon); color:#000; }
+.btn-neon:hover { filter:brightness(1.2); }
+.btn-neon:disabled { opacity:0.4; cursor:not-allowed; }
+.btn-blue { background:var(--neon2); color:#000; }
+.btn-pink { background:var(--pink); color:#fff; }
+.btn-outline { background:transparent; color:var(--neon); border:1px solid var(--neon); }
+.btn-sm { padding:8px 16px; width:auto; display:inline-block; font-size:0.85rem; border-radius:8px; }
+.btn-danger { background:var(--danger); color:#fff; }
+
+/* Inputs */
+input[type="text"], input[type="number"], input[type="password"], select, textarea {
+  width:100%; padding:12px; background:var(--bg); color:var(--text);
+  border:1px solid var(--bg3); border-radius:8px; font-size:1rem; outline:none;
+}
+input:focus, select:focus { border-color:var(--neon); }
+label { display:block; font-size:0.85rem; color:var(--text2); margin-bottom:4px; margin-top:12px; }
+
+/* App Layout */
+#app { display:none; min-height:100vh; min-height:100dvh; padding-bottom:70px; }
+.app-header {
+  background:var(--bg2); border-bottom:1px solid var(--bg3);
+  padding:12px 16px; display:flex; align-items:center; justify-content:space-between;
+  position:sticky; top:0; z-index:100;
+}
+.app-header h1 { font-size:1.1rem; color:var(--neon); }
+.role-badge { font-size:0.75rem; padding:4px 10px; border-radius:20px; font-weight:600; }
+.role-child { background:var(--neon2); color:#000; }
+.role-parent { background:var(--pink); color:#fff; }
+.sync-dot {
+  width:8px; height:8px; border-radius:50%; display:inline-block; margin-left:8px;
+}
+.sync-dot.online { background:var(--neon); }
+.sync-dot.offline { background:var(--danger); }
+.app-content { max-width:480px; margin:0 auto; padding:16px; }
+
+/* Bottom Nav */
+.bottom-nav {
+  position:fixed; bottom:0; left:0; right:0; background:var(--bg2);
+  border-top:1px solid var(--bg3); display:flex; z-index:100;
+  padding-bottom:env(safe-area-inset-bottom, 0);
+}
+.nav-item {
+  flex:1; padding:8px 4px; display:flex; flex-direction:column;
+  align-items:center; gap:2px; cursor:pointer; border:none; background:none;
+  color:var(--text2); font-size:0.65rem; position:relative;
+}
+.nav-item.active { color:var(--neon); }
+.nav-item .nav-icon { font-size:1.3rem; }
+
+/* Cards */
+.card {
+  background:var(--bg2); border:1px solid var(--bg3);
+  border-radius:var(--radius); padding:16px; margin-bottom:12px;
+}
+.card-title {
+  font-size:0.85rem; color:var(--text2); text-transform:uppercase;
+  letter-spacing:1px; margin-bottom:12px;
+}
+
+/* Level */
+.level-display { text-align:center; padding:20px 0; }
+.level-number {
+  font-size:4rem; font-weight:800; color:var(--neon);
+  text-shadow:0 0 30px rgba(0,255,65,0.4); line-height:1;
+}
+.level-label { font-size:0.9rem; color:var(--text2); margin-top:4px; }
+
+/* XP Bar */
+.xp-bar-bg { height:8px; background:var(--bg3); border-radius:4px; overflow:hidden; }
+.xp-bar-fill {
+  height:100%; background:linear-gradient(90deg,var(--neon),var(--neon2));
+  border-radius:4px; transition:width 0.5s ease;
+}
+.xp-bar-text {
+  display:flex; justify-content:space-between;
+  font-size:0.75rem; color:var(--text2); margin-top:4px;
+}
+
+/* Stats */
+.stats-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
+.stat-item { background:var(--bg3); border-radius:8px; padding:12px; text-align:center; }
+.stat-value { font-size:1.5rem; font-weight:700; color:var(--neon); }
+.stat-label { font-size:0.7rem; color:var(--text2); margin-top:2px; }
+
+/* Upload Area */
+.upload-area {
+  border:2px dashed var(--bg3); border-radius:var(--radius);
+  padding:2rem 1rem; text-align:center; cursor:pointer;
+  transition:all 0.2s; position:relative;
+}
+.upload-area:hover, .upload-area.dragover {
+  border-color:var(--neon); background:rgba(0,255,65,0.05);
+}
+.upload-area .upload-icon { font-size:3rem; margin-bottom:0.5rem; }
+.upload-area p { color:var(--text2); font-size:0.9rem; }
+.upload-area input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+
+/* Preview Image */
+.preview-img {
+  max-width:100%; border-radius:8px; margin:12px 0;
+  border:1px solid var(--bg3);
+}
+
+/* Analysis Result */
+.analysis-result {
+  background:var(--bg3); border-radius:8px; padding:14px;
+  margin:12px 0;
+}
+.analysis-row {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:8px 0; border-bottom:1px solid rgba(255,255,255,0.05);
+}
+.analysis-row:last-child { border-bottom:none; }
+.analysis-app { display:flex; align-items:center; gap:8px; }
+.analysis-time { font-weight:600; }
+.analysis-time.ok { color:var(--neon); }
+.analysis-time.over { color:var(--danger); }
+
+/* Progress bar for OCR */
+.ocr-progress {
+  margin:12px 0; display:none;
+}
+.ocr-progress-bar {
+  height:6px; background:var(--bg3); border-radius:3px; overflow:hidden;
+}
+.ocr-progress-fill {
+  height:100%; background:var(--neon); border-radius:3px;
+  transition:width 0.3s; width:0%;
+}
+.ocr-status { font-size:0.8rem; color:var(--text2); margin-top:6px; text-align:center; }
+
+/* Request Card */
+.request-card {
+  background:var(--bg2); border:1px solid var(--bg3);
+  border-radius:var(--radius); padding:14px; margin-bottom:10px;
+}
+.request-card.pending { border-left:3px solid var(--warn); }
+.request-card.approved { border-left:3px solid var(--neon); }
+.request-card.denied { border-left:3px solid var(--danger); }
+.request-header {
+  display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;
+}
+.request-app { font-weight:600; }
+.request-status { font-size:0.75rem; padding:2px 8px; border-radius:10px; font-weight:600; }
+.status-pending { background:rgba(255,107,53,0.2); color:var(--warn); }
+.status-approved { background:rgba(0,255,65,0.2); color:var(--neon); }
+.status-denied { background:rgba(255,7,58,0.2); color:var(--danger); }
+.request-detail { font-size:0.85rem; color:var(--text2); margin-bottom:4px; }
+.request-actions { display:flex; gap:8px; margin-top:10px; }
+
+/* History */
+.history-day {
+  background:var(--bg2); border:1px solid var(--bg3);
+  border-radius:var(--radius); padding:14px; margin-bottom:8px;
+}
+.history-date { font-size:0.85rem; font-weight:600; margin-bottom:8px; color:var(--neon2); }
+.history-items { display:flex; flex-wrap:wrap; gap:8px; font-size:0.8rem; }
+.history-item { color:var(--text2); }
+.history-item.over { color:var(--danger); }
+.history-xp { font-weight:700; color:var(--neon); margin-left:auto; }
+.history-img-btn {
+  background:var(--bg3); border:none; color:var(--neon2); padding:4px 10px;
+  border-radius:6px; font-size:0.75rem; cursor:pointer; margin-top:6px;
+}
+
+/* Achievements */
+.achievement {
+  display:flex; align-items:center; gap:12px;
+  padding:12px; background:var(--bg3); border-radius:8px; margin-bottom:8px;
+}
+.achievement.locked { opacity:0.4; }
+.achievement .ach-icon { font-size:1.5rem; }
+.achievement .ach-name { font-weight:600; font-size:0.9rem; }
+.achievement .ach-desc { font-size:0.75rem; color:var(--text2); }
+
+/* Toast */
+.toast {
+  position:fixed; top:20px; left:50%; transform:translateX(-50%);
+  background:var(--neon); color:#000; padding:12px 24px; border-radius:8px;
+  font-weight:600; font-size:0.9rem; z-index:10000; opacity:0;
+  transition:opacity 0.3s; max-width:90%; text-align:center;
+}
+.toast.show { opacity:1; }
+.toast.error { background:var(--danger); color:#fff; }
+
+/* Celebration */
+#celebration {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.85);
+  z-index:9000; align-items:center; justify-content:center; flex-direction:column;
+}
+#celebration.show { display:flex; }
+#celebration .cel-icon { font-size:4rem; margin-bottom:1rem; }
+#celebration .cel-title { font-size:1.8rem; font-weight:800; color:var(--neon); margin-bottom:0.5rem; }
+#celebration .cel-text { color:var(--text2); text-align:center; margin-bottom:1.5rem; padding:0 2rem; }
+
+/* Image Viewer Modal */
+#imageViewer {
+  display:none; position:fixed; inset:0; background:rgba(0,0,0,0.95);
+  z-index:9500; align-items:center; justify-content:center; flex-direction:column;
+  padding:1rem;
+}
+#imageViewer.show { display:flex; }
+#imageViewer img { max-width:100%; max-height:80vh; border-radius:8px; }
+#imageViewer .close-btn {
+  position:absolute; top:16px; right:16px; background:var(--bg3);
+  border:none; color:#fff; width:40px; height:40px; border-radius:50%;
+  font-size:1.2rem; cursor:pointer;
+}
+
+/* Settings */
+.settings-item {
+  display:flex; justify-content:space-between; align-items:center;
+  padding:14px 0; border-bottom:1px solid var(--bg3);
+}
+.settings-item:last-child { border-bottom:none; }
+
+.section-header { display:flex; justify-content:space-between; align-items:center; margin-bottom:12px; }
+.section-title { font-size:1.1rem; font-weight:700; }
+.empty-state { text-align:center; padding:3rem 1rem; color:var(--text2); }
+.empty-state .empty-icon { font-size:3rem; margin-bottom:1rem; }
+.page { display:none; }
+.page.active { display:block; }
+@keyframes fadeIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+.fade-in { animation:fadeIn 0.3s ease; }
+
+/* Tabs */
+.tabs { display:flex; gap:4px; margin-bottom:16px; }
+.tab {
+  flex:1; padding:10px; text-align:center; border:1px solid var(--bg3);
+  background:var(--bg2); color:var(--text2); border-radius:8px;
+  cursor:pointer; font-size:0.85rem; font-weight:600; transition:all 0.2s;
+}
+.tab.active { background:var(--neon); color:#000; border-color:var(--neon); }
+</style>
+</head>
+<body>
+
+<!-- LOADING -->
+<div id="loading">
+  <h1>LEVEL:11</h1>
+  <div class="spinner"></div>
+  <div class="status" id="loadingStatus">Cargando...</div>
+</div>
+
+<!-- SETUP -->
+<div id="setup">
+  <h1>🎮 LEVEL:11</h1>
+  <p class="subtitle">Bienestar Digital Gamificado</p>
+
+  <div id="setupStep1" class="setup-card">
+    <h2>¿Quién eres?</h2>
+    <p>Sin cuentas, sin configuración. Se sincroniza automáticamente.</p>
+    <div style="display:flex; gap:10px; margin-top:12px">
+      <button class="btn btn-blue" style="flex:1" onclick="selectRole('child')">👧 Soy Elo</button>
+      <button class="btn btn-pink" style="flex:1" onclick="selectRole('parent')">👨 Soy Papá</button>
+    </div>
+  </div>
+
+  <div id="setupStep2" class="setup-card" style="display:none">
+    <h2 id="step2Title"></h2>
+    <div id="step2Create" style="display:none">
+      <p>Crea un código familiar secreto. Dáselo a Elo para que se conecte.</p>
+      <label>Código familiar (4+ caracteres)</label>
+      <input type="text" id="familyCodeCreate" placeholder="ej: elo2025" maxlength="20" autocomplete="off">
+      <div style="margin-top:14px">
+        <button class="btn btn-neon" onclick="createFamily()">Crear y Entrar</button>
+      </div>
+    </div>
+    <div id="step2Join" style="display:none">
+      <p>Ingresa el código que te dio tu papá.</p>
+      <label>Código familiar</label>
+      <input type="text" id="familyCodeJoin" placeholder="ej: elo2025" maxlength="20" autocomplete="off">
+      <label>Tu nombre</label>
+      <input type="text" id="childName" placeholder="Elo" maxlength="30" value="Elo">
+      <div style="margin-top:14px">
+        <button class="btn btn-neon" onclick="joinFamily()">Unirme</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MAIN APP -->
+<div id="app">
+  <div class="app-header">
+    <h1>LEVEL:11 <span class="sync-dot" id="syncDot"></span></h1>
+    <span class="role-badge" id="roleBadge"></span>
+  </div>
+
+  <div class="app-content">
+
+    <!-- ══ CHILD: Home ══ -->
+    <div class="page" id="pageHome">
+      <div class="level-display fade-in">
+        <div class="level-number" id="levelNum">1</div>
+        <div class="level-label">NIVEL</div>
+      </div>
+      <div style="margin:12px 0">
+        <div class="xp-bar-bg"><div class="xp-bar-fill" id="xpBar" style="width:0%"></div></div>
+        <div class="xp-bar-text"><span id="xpCurrent">0 XP</span><span id="xpNext">100 XP</span></div>
+      </div>
+      <div class="stats-grid" style="margin-top:16px">
+        <div class="stat-item"><div class="stat-value" id="statStreak">0</div><div class="stat-label">RACHA</div></div>
+        <div class="stat-item"><div class="stat-value" id="statTotalXP">0</div><div class="stat-label">XP TOTAL</div></div>
+        <div class="stat-item"><div class="stat-value" id="statDays">0</div><div class="stat-label">DÍAS</div></div>
+        <div class="stat-item"><div class="stat-value" id="statTarget">75</div><div class="stat-label">META</div></div>
+      </div>
+      <div class="card" style="margin-top:12px">
+        <div class="card-title">HOY</div>
+        <div id="todayContent"></div>
+      </div>
+    </div>
+
+    <!-- ══ CHILD: Check-in (PHOTO UPLOAD) ══ -->
+    <div class="page" id="pageCheckin">
+      <div class="section-header">
+        <div class="section-title">Check-in Diario</div>
+      </div>
+
+      <!-- Tabs: Photo or Manual -->
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('photo',this)">📸 Subir Foto</div>
+        <div class="tab" onclick="switchTab('manual',this)">✏️ Manual</div>
+      </div>
+
+      <!-- Photo Upload Tab -->
+      <div id="tabPhoto">
+        <div class="card">
+          <p style="font-size:0.85rem;color:var(--text2);margin-bottom:12px">
+            Sube una captura de <b>Tiempo en Pantalla</b> de tu iPhone o iPad.
+            La app detecta automáticamente cuánto usaste cada app.
+          </p>
+          <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">📱</div>
+            <p>Toca para subir captura de Screen Time</p>
+            <p style="font-size:0.75rem;margin-top:4px">iPhone: Ajustes → Tiempo en Pantalla → Ver toda la actividad → Screenshot</p>
+            <input type="file" accept="image/*" id="fileInput" onchange="handleFileUpload(event)">
+          </div>
+
+          <div class="ocr-progress" id="ocrProgress">
+            <div class="ocr-progress-bar"><div class="ocr-progress-fill" id="ocrFill"></div></div>
+            <div class="ocr-status" id="ocrStatus">Analizando imagen...</div>
+          </div>
+
+          <img class="preview-img" id="previewImg" style="display:none">
+
+          <div id="analysisResult" style="display:none">
+            <div class="card-title">RESULTADO DEL ANÁLISIS</div>
+            <div class="analysis-result" id="analysisData"></div>
+            <div style="margin-top:8px">
+              <p style="font-size:0.8rem;color:var(--text2)">¿Los datos son correctos? Puedes editarlos abajo antes de confirmar.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Editable fields after analysis -->
+        <div class="card" id="editableFields" style="display:none">
+          <div class="card-title">CONFIRMAR TIEMPOS</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div>
+              <label>📱 TikTok (min)</label>
+              <input type="number" id="ciTiktok" min="0" max="999" placeholder="0" inputmode="numeric">
+            </div>
+            <div>
+              <label>📸 Instagram (min)</label>
+              <input type="number" id="ciInstagram" min="0" max="999" placeholder="0" inputmode="numeric">
+            </div>
+            <div>
+              <label>🎮 Roblox (min)</label>
+              <input type="number" id="ciRoblox" min="0" max="999" placeholder="0" inputmode="numeric">
+            </div>
+            <div>
+              <label>🔓 Desbloqueos</label>
+              <input type="number" id="ciUnlocks" min="0" max="999" placeholder="0" inputmode="numeric">
+            </div>
+          </div>
+          <div class="card" id="xpPreview" style="margin-top:12px;display:none">
+            <div class="card-title">XP QUE GANARÁS</div>
+            <div id="xpBreakdown"></div>
+            <div style="margin-top:8px;font-size:1.2rem;font-weight:700;color:var(--neon)" id="xpTotal"></div>
+          </div>
+          <button class="btn btn-neon" onclick="submitCheckin()" style="margin-top:12px">
+            ✅ Confirmar Check-in
+          </button>
+        </div>
+      </div>
+
+      <!-- Manual Tab -->
+      <div id="tabManual" style="display:none">
+        <div class="card">
+          <p style="font-size:0.85rem;color:var(--text2);margin-bottom:12px">
+            Ingresa tu uso de hoy manualmente
+          </p>
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px">
+            <div>
+              <label>📱 TikTok (min)</label>
+              <input type="number" id="ciTiktokM" min="0" max="999" placeholder="0" inputmode="numeric">
+            </div>
+            <div>
+              <label>📸 Instagram (min)</label>
+              <input type="number" id="ciInstagramM" min="0" max="999" placeholder="0" inputmode="numeric">
+            </div>
+            <div>
+              <label>🎮 Roblox (min)</label>
+              <input type="number" id="ciRobloxM" min="0" max="999" placeholder="0" inputmode="numeric">
+            </div>
+            <div>
+              <label>🔓 Desbloqueos</label>
+              <input type="number" id="ciUnlocksM" min="0" max="999" placeholder="0" inputmode="numeric">
+            </div>
+          </div>
+          <button class="btn btn-neon" onclick="submitCheckinManual()" style="margin-top:14px">
+            ✅ Enviar Check-in
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ══ CHILD: Request Time ══ -->
+    <div class="page" id="pageRequest">
+      <div class="section-header"><div class="section-title">Pedir Más Tiempo</div></div>
+      <div class="card">
+        <label>¿Para qué app?</label>
+        <select id="reqApp">
+          <option value="TikTok">📱 TikTok</option>
+          <option value="Instagram">📸 Instagram</option>
+          <option value="Roblox">🎮 Roblox</option>
+          <option value="YouTube">▶️ YouTube</option>
+          <option value="Otro">📦 Otro</option>
+        </select>
+        <label>¿Cuántos minutos extra?</label>
+        <input type="number" id="reqMinutes" min="5" max="120" placeholder="15" value="15" inputmode="numeric">
+        <label>¿Por qué lo necesitas?</label>
+        <input type="text" id="reqReason" placeholder="ej: Tutorial de arte">
+        <div style="margin-top:14px">
+          <button class="btn btn-neon" onclick="submitRequest()">Enviar Solicitud a Papá</button>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <div class="card-title">MIS SOLICITUDES</div>
+        <div id="myRequests"></div>
+      </div>
+    </div>
+
+    <!-- ══ PARENT: Dashboard ══ -->
+    <div class="page" id="pageParentHome">
+      <div class="section-header"><div class="section-title">Dashboard Parental</div></div>
+      <div class="card">
+        <div class="card-title">ESTADO DE <span id="pChildName">ELO</span></div>
+        <div class="level-display" style="padding:10px 0">
+          <div class="level-number" style="font-size:2.5rem" id="pLevelNum">1</div>
+          <div class="level-label">NIVEL</div>
+        </div>
+        <div style="margin:8px 0">
+          <div class="xp-bar-bg"><div class="xp-bar-fill" id="pXpBar" style="width:0%"></div></div>
+          <div class="xp-bar-text"><span id="pXpCurrent">0 XP</span><span id="pXpNext">100 XP</span></div>
+        </div>
+        <div class="stats-grid" style="margin-top:12px">
+          <div class="stat-item"><div class="stat-value" id="pStatStreak">0</div><div class="stat-label">RACHA</div></div>
+          <div class="stat-item"><div class="stat-value" id="pStatDays">0</div><div class="stat-label">DÍAS</div></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="card-title">CHECK-IN DE HOY</div>
+        <div id="pTodayContent">
+          <div class="empty-state" style="padding:1rem"><p>Aún no ha hecho check-in hoy</p></div>
+        </div>
+      </div>
+      <div class="card" id="pRequestsCard" style="display:none">
+        <div class="card-title">⚡ SOLICITUDES PENDIENTES</div>
+        <div id="pPendingRequests"></div>
+      </div>
+    </div>
+
+    <!-- ══ PARENT: Requests ══ -->
+    <div class="page" id="pageParentRequests">
+      <div class="section-header"><div class="section-title">Solicitudes</div></div>
+      <div id="allRequests"></div>
+      <div class="empty-state" id="noRequests"><div class="empty-icon">📭</div><p>No hay solicitudes</p></div>
+    </div>
+
+    <!-- ══ SHARED: History ══ -->
+    <div class="page" id="pageHistory">
+      <div class="section-header"><div class="section-title">Historial</div></div>
+      <div id="historyList"></div>
+      <div class="empty-state" id="noHistory"><div class="empty-icon">📅</div><p>Aún no hay registros</p></div>
+    </div>
+
+    <!-- ══ SHARED: Achievements ══ -->
+    <div class="page" id="pageAchievements">
+      <div class="section-header"><div class="section-title">Logros</div></div>
+      <div id="achievementsList"></div>
+    </div>
+
+    <!-- ══ SHARED: Settings ══ -->
+    <div class="page" id="pageSettings">
+      <div class="section-header"><div class="section-title">Ajustes</div></div>
+      <div class="card">
+        <div class="settings-item"><span>Rol</span><span style="color:var(--text2)" id="settRole"></span></div>
+        <div class="settings-item"><span>Código</span><span style="color:var(--text2)" id="settFamily"></span></div>
+        <div class="settings-item"><span>Sync</span><span style="color:var(--text2)" id="settSync">Conectando...</span></div>
+        <div class="settings-item"><span>Versión</span><span style="color:var(--text2)">2.1.0</span></div>
+      </div>
+      <div class="card" id="parentLimitsCard" style="display:none">
+        <div class="card-title">LÍMITES</div>
+        <label>TikTok (min/día)</label>
+        <input type="number" id="limTiktok" value="30" min="0" inputmode="numeric">
+        <label>Instagram (min/día)</label>
+        <input type="number" id="limInstagram" value="20" min="0" inputmode="numeric">
+        <label>Roblox (min/semana)</label>
+        <input type="number" id="limRoblox" value="120" min="0" inputmode="numeric">
+        <label>Desbloqueos (por día)</label>
+        <input type="number" id="limUnlocks" value="50" min="0" inputmode="numeric">
+        <div style="margin-top:12px">
+          <button class="btn btn-neon btn-sm" onclick="saveLimits()">Guardar</button>
+        </div>
+      </div>
+      <div style="margin-top:16px">
+        <button class="btn btn-danger" onclick="resetApp()">Cerrar Sesión</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Child Nav -->
+  <div class="bottom-nav" id="navChild" style="display:none">
+    <button class="nav-item active" onclick="navigate('pageHome',this)"><span class="nav-icon">🏠</span>Inicio</button>
+    <button class="nav-item" onclick="navigate('pageCheckin',this)"><span class="nav-icon">📸</span>Check-in</button>
+    <button class="nav-item" onclick="navigate('pageRequest',this)"><span class="nav-icon">🙏</span>Pedir</button>
+    <button class="nav-item" onclick="navigate('pageAchievements',this)"><span class="nav-icon">🏆</span>Logros</button>
+    <button class="nav-item" onclick="navigate('pageSettings',this)"><span class="nav-icon">⚙️</span>Ajustes</button>
+  </div>
+
+  <!-- Parent Nav -->
+  <div class="bottom-nav" id="navParent" style="display:none">
+    <button class="nav-item active" onclick="navigate('pageParentHome',this)"><span class="nav-icon">📊</span>Dashboard</button>
+    <button class="nav-item" onclick="navigate('pageParentRequests',this)"><span class="nav-icon">📩</span>Solicitudes</button>
+    <button class="nav-item" onclick="navigate('pageHistory',this)"><span class="nav-icon">📅</span>Historial</button>
+    <button class="nav-item" onclick="navigate('pageAchievements',this)"><span class="nav-icon">🏆</span>Logros</button>
+    <button class="nav-item" onclick="navigate('pageSettings',this)"><span class="nav-icon">⚙️</span>Ajustes</button>
+  </div>
+</div>
+
+<!-- Celebration -->
+<div id="celebration">
+  <div class="cel-icon" id="celIcon"></div>
+  <div class="cel-title" id="celTitle"></div>
+  <div class="cel-text" id="celText"></div>
+  <button class="btn btn-neon btn-sm" onclick="closeCelebration()">¡Genial!</button>
+</div>
+
+<!-- Image Viewer -->
+<div id="imageViewer">
+  <button class="close-btn" onclick="closeImageViewer()">✕</button>
+  <img id="viewerImg" src="">
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<!-- Gun.js P2P Sync -->
+<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
+
+<!-- Tesseract.js OCR -->
+<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<script>
+/* ═══════════════════════════════════════════
+   LEVEL:11 PWA v2.1 - Photo Upload + OCR
+   ═══════════════════════════════════════════ */
+
+const gun = Gun({
+  peers: ['https://gun-manhattan.herokuapp.com/gun','https://gun-us.herokuapp.com/gun'],
+  localStorage: true
+});
+
+let familyGun = null;
+let currentImageData = null;
+
+let state = {
+  role: null, familyCode: null, childName: 'Elo',
+  data: {
+    xp:0, level:1, streak:0,
+    checkins:{}, achievements:{}, requests:{},
+    limits:{ tiktok:30, instagram:20, roblox:120, unlocks:50 }
+  }
+};
+
+const ACHIEVEMENTS = [
+  {id:'FIRST_LOGIN',name:'Primer Acceso',desc:'Abriste la app',icon:'◈',check:d=>true},
+  {id:'FIREWALL',name:'Firewall',desc:'3 días consecutivos',icon:'◉',check:d=>d.streak>=3},
+  {id:'STREAK_7',name:'Semana Fuerte',desc:'7 días consecutivos',icon:'▲',check:d=>d.streak>=7},
+  {id:'FORTITUDE',name:'Fortaleza',desc:'14 días consecutivos',icon:'⬢',check:d=>d.streak>=14},
+  {id:'CHAMPION',name:'Campeón',desc:'30 días consecutivos',icon:'★',check:d=>d.streak>=30},
+  {id:'EXPLORER',name:'Explorador',desc:'Nivel 10',icon:'◎',check:d=>d.level>=10},
+  {id:'WARRIOR',name:'Guerrero',desc:'Nivel 25',icon:'⬡',check:d=>d.level>=25},
+  {id:'HERO',name:'Héroe',desc:'Nivel 50',icon:'◆',check:d=>d.level>=50},
+  {id:'LEGEND',name:'LEYENDA',desc:'Nivel 75 - iPHONE 13!',icon:'♔',check:d=>d.level>=75},
+  {id:'PERFECT_WEEK',name:'Semana Perfecta',desc:'7 días perfectos',icon:'✦',check:d=>countPerfect(d)>=7},
+  {id:'MINDFLAYER',name:'Mind Flayer',desc:'Nivel 60+',icon:'✧',check:d=>d.level>=60},
+];
+
+function countPerfect(d){ return Object.values(d.checkins||{}).filter(c=>c.perfect).length; }
+function today(){ return new Date().toISOString().split('T')[0]; }
+function getWeekStart(){
+  const d=new Date(), day=d.getDay(), diff=d.getDate()-day+(day===0?-6:1);
+  return new Date(d.setDate(diff)).toISOString().split('T')[0];
+}
+function getWeeklyRoblox(exclude){
+  const ws=getWeekStart(), td=today(); let t=0;
+  for(const[date,ci] of Object.entries(state.data.checkins||{}))
+    if(date>=ws && ci.roblox && !(exclude && date===td)) t+=ci.roblox;
+  return t;
+}
+
+function showToast(m,err){
+  const t=document.getElementById('toast');
+  t.textContent=m; t.className='toast show'+(err?' error':'');
+  setTimeout(()=>t.className='toast',3000);
+}
+function showCelebration(i,t,x){
+  document.getElementById('celIcon').textContent=i;
+  document.getElementById('celTitle').textContent=t;
+  document.getElementById('celText').textContent=x;
+  document.getElementById('celebration').classList.add('show');
+}
+function closeCelebration(){ document.getElementById('celebration').classList.remove('show'); }
+
+function navigate(pageId,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(pageId).classList.add('active');
+  const nav=state.role==='child'?'navChild':'navParent';
+  document.querySelectorAll(`#${nav} .nav-item`).forEach(b=>b.classList.remove('active'));
+  if(btn) btn.classList.add('active');
+}
+
+// ── Tabs ──
+function switchTab(tab,el){
+  document.querySelectorAll('.tabs .tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('tabPhoto').style.display = tab==='photo'?'block':'none';
+  document.getElementById('tabManual').style.display = tab==='manual'?'block':'none';
+}
+
+// ── Setup ──
+function selectRole(role){
+  state.role=role;
+  document.getElementById('setupStep1').style.display='none';
+  document.getElementById('setupStep2').style.display='block';
+  if(role==='parent'){
+    document.getElementById('step2Title').textContent='Crear Código Familiar';
+    document.getElementById('step2Create').style.display='block';
+    document.getElementById('step2Join').style.display='none';
+  } else {
+    document.getElementById('step2Title').textContent='Unirse a Familia';
+    document.getElementById('step2Create').style.display='none';
+    document.getElementById('step2Join').style.display='block';
+  }
+}
+function createFamily(){
+  const code=document.getElementById('familyCodeCreate').value.trim().toLowerCase();
+  if(code.length<4) return showToast('Mínimo 4 caracteres',true);
+  state.familyCode=code; saveLocal(); connectGun(); startApp();
+}
+function joinFamily(){
+  const code=document.getElementById('familyCodeJoin').value.trim().toLowerCase();
+  const name=document.getElementById('childName').value.trim()||'Elo';
+  if(code.length<4) return showToast('Código inválido',true);
+  state.familyCode=code; state.childName=name;
+  saveLocal(); connectGun();
+  familyGun.get('childName').put(name);
+  startApp();
+}
+
+// ── Gun.js ──
+function connectGun(){
+  familyGun=gun.get('level11_'+state.familyCode);
+  familyGun.get('gameData').on(function(d){
+    if(!d)return;
+    if(d.xp!==undefined)state.data.xp=d.xp;
+    if(d.level!==undefined)state.data.level=d.level;
+    if(d.streak!==undefined)state.data.streak=d.streak;
+    updateUI();
+  });
+  familyGun.get('checkins').map().on(function(d,k){
+    if(!d||k==='_')return;
+    try{
+      const ci=typeof d==='string'?JSON.parse(d):d;
+      if(ci&&ci.tiktok!==undefined){state.data.checkins[k]=ci;updateUI();}
+    }catch(e){}
+  });
+  familyGun.get('requests').map().on(function(d,k){
+    if(!d||k==='_')return;
+    try{
+      const r=typeof d==='string'?JSON.parse(d):d;
+      if(r&&r.app){state.data.requests[k]=r;updateUI();}
+    }catch(e){}
+  });
+  familyGun.get('limits').on(function(d){
+    if(!d)return;
+    ['tiktok','instagram','roblox','unlocks'].forEach(k=>{
+      if(d[k]!==undefined)state.data.limits[k]=d[k];
+    });
+    updateUI();
+  });
+  familyGun.get('childName').on(function(n){
+    if(n&&typeof n==='string'){state.childName=n;
+      const el=document.getElementById('pChildName');if(el)el.textContent=n.toUpperCase();
+    }
+  });
+  updateSyncStatus(true);
+}
+function syncToGun(){
+  if(!familyGun)return;
+  familyGun.get('gameData').put({xp:state.data.xp,level:state.data.level,streak:state.data.streak});
+  familyGun.get('limits').put(state.data.limits);
+  saveLocal();
+}
+function syncCheckin(k,d){ if(familyGun) familyGun.get('checkins').get(k).put(JSON.stringify(d)); }
+function syncRequest(k,d){ if(familyGun) familyGun.get('requests').get(k).put(JSON.stringify(d)); }
+function updateSyncStatus(c){
+  const dot=document.getElementById('syncDot');
+  if(dot)dot.className='sync-dot '+(c?'online':'offline');
+  const s=document.getElementById('settSync');if(s)s.textContent=c?'Conectado (P2P)':'Offline';
+}
+
+// ── Storage ──
+function saveLocal(){
+  localStorage.setItem('level11_pwa_v2',JSON.stringify({
+    role:state.role,familyCode:state.familyCode,childName:state.childName,data:state.data
+  }));
+}
+function loadLocal(){
+  try{
+    const s=JSON.parse(localStorage.getItem('level11_pwa_v2'));
+    if(s&&s.role&&s.familyCode){
+      Object.assign(state,s);
+      if(!state.data.checkins)state.data.checkins={};
+      if(!state.data.achievements)state.data.achievements={};
+      if(!state.data.requests)state.data.requests={};
+      if(!state.data.limits)state.data.limits={tiktok:30,instagram:20,roblox:120,unlocks:50};
+      return true;
+    }
+  }catch(e){}
+  return false;
+}
+
+// ── App Start ──
+function startApp(){
+  document.getElementById('setup').style.display='none';
+  document.getElementById('app').style.display='block';
+  const badge=document.getElementById('roleBadge');
+  if(state.role==='child'){
+    badge.textContent='👧 '+state.childName;badge.className='role-badge role-child';
+    document.getElementById('navChild').style.display='flex';
+    document.getElementById('navParent').style.display='none';
+    navigate('pageHome');
+  } else {
+    badge.textContent='👨 Papá';badge.className='role-badge role-parent';
+    document.getElementById('navParent').style.display='flex';
+    document.getElementById('navChild').style.display='none';
+    navigate('pageParentHome');
+    document.getElementById('parentLimitsCard').style.display='block';
+    document.getElementById('limTiktok').value=state.data.limits.tiktok;
+    document.getElementById('limInstagram').value=state.data.limits.instagram;
+    document.getElementById('limRoblox').value=state.data.limits.roblox;
+    document.getElementById('limUnlocks').value=state.data.limits.unlocks;
+  }
+  document.getElementById('settRole').textContent=state.role==='child'?'Hija':'Papá';
+  document.getElementById('settFamily').textContent=state.familyCode;
+
+  // Input listeners for XP preview
+  ['ciTiktok','ciInstagram','ciRoblox','ciUnlocks'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el)el.addEventListener('input',previewXP);
+  });
+
+  if(!state.data.achievements.FIRST_LOGIN){
+    state.data.achievements.FIRST_LOGIN={unlockedAt:Date.now()};saveLocal();
+  }
+  updateUI();
+}
+
+// ══════════════════════════════════════
+// PHOTO UPLOAD + OCR ANALYSIS
+// ══════════════════════════════════════
+
+function handleFileUpload(event){
+  const file=event.target.files[0];
+  if(!file)return;
+
+  // Show preview
+  const reader=new FileReader();
+  reader.onload=function(e){
+    currentImageData=e.target.result;
+    const img=document.getElementById('previewImg');
+    img.src=currentImageData; img.style.display='block';
+    analyzeScreenTime(currentImageData);
+  };
+  reader.readAsDataURL(file);
+}
+
+async function analyzeScreenTime(imageData){
+  const progress=document.getElementById('ocrProgress');
+  const fill=document.getElementById('ocrFill');
+  const status=document.getElementById('ocrStatus');
+  const result=document.getElementById('analysisResult');
+  const fields=document.getElementById('editableFields');
+
+  progress.style.display='block';
+  result.style.display='none';
+  fields.style.display='none';
+  fill.style.width='10%';
+  status.textContent='Preparando análisis...';
+
+  try{
+    const worker=await Tesseract.createWorker('spa+eng',1,{
+      logger:m=>{
+        if(m.status==='recognizing text'){
+          fill.style.width=Math.round(m.progress*100)+'%';
+          status.textContent='Analizando texto... '+Math.round(m.progress*100)+'%';
+        }
+      }
+    });
+
+    fill.style.width='80%';
+    status.textContent='Leyendo texto de la imagen...';
+
+    const{data:{text}}=await worker.recognize(imageData);
+    await worker.terminate();
+
+    fill.style.width='100%';
+    status.textContent='¡Análisis completo!';
+
+    // Parse Screen Time data from OCR text
+    const parsed=parseScreenTimeText(text);
+    showAnalysisResult(parsed);
+
+  }catch(err){
+    console.error('OCR Error:',err);
+    status.textContent='Error al analizar. Ingresa los datos manualmente.';
+    fields.style.display='block';
+  }
+}
+
+function parseScreenTimeText(text){
+  const lines=text.toLowerCase().replace(/\n/g,' ');
+  const result={tiktok:0,instagram:0,roblox:0,youtube:0,safari:0,whatsapp:0,other:[]};
+
+  // Common app name patterns in Screen Time screenshots
+  const appPatterns=[
+    {key:'tiktok', patterns:['tiktok','tik tok','tik-tok']},
+    {key:'instagram', patterns:['instagram','insta']},
+    {key:'roblox', patterns:['roblox']},
+    {key:'youtube', patterns:['youtube','you tube']},
+    {key:'safari', patterns:['safari']},
+    {key:'whatsapp', patterns:['whatsapp','wha tsapp']},
+  ];
+
+  // Try to extract time for each app
+  // Screen Time format: "AppName    Xh Ym" or "AppName    X min" or "AppName    Xm"
+  appPatterns.forEach(({key,patterns})=>{
+    patterns.forEach(pattern=>{
+      // Match patterns like "tiktok ... 1h 30m", "tiktok ... 45 min", "tiktok ... 1:30"
+      const regexes=[
+        new RegExp(pattern+'[^\\d]*(\\d+)\\s*h(?:r|rs|oras?)?\\s*(\\d+)\\s*m','i'),
+        new RegExp(pattern+'[^\\d]*(\\d+)\\s*h(?:r|rs|oras?)?','i'),
+        new RegExp(pattern+'[^\\d]*(\\d+)\\s*m(?:in)?','i'),
+        new RegExp(pattern+'[^\\d]*(\\d+):(\\d+)','i'),
+      ];
+      for(const rx of regexes){
+        const match=lines.match(rx);
+        if(match){
+          if(match[2]!==undefined){
+            // hours + minutes or hours:minutes
+            result[key]=parseInt(match[1])*60+parseInt(match[2]);
+          } else {
+            const val=parseInt(match[1]);
+            // If single number > 10, likely minutes. If <= 10, could be hours
+            result[key]= val;
+          }
+          break;
+        }
+      }
+    });
+  });
+
+  // Also try to find total screen time
+  const totalMatch=lines.match(/(?:total|tiempo en pantalla|screen time|tiempo total)[^\\d]*(\\d+)\\s*h(?:r|rs|oras?)?\\s*(\\d+)\\s*m/i)
+    || lines.match(/(?:total|tiempo en pantalla|screen time|tiempo total)[^\\d]*(\\d+)\\s*h/i);
+
+  if(totalMatch){
+    result.totalMinutes=totalMatch[2]?parseInt(totalMatch[1])*60+parseInt(totalMatch[2]):parseInt(totalMatch[1])*60;
+  }
+
+  // Try to find unlocks/pickups
+  const unlockMatch=lines.match(/(?:activaciones|pickups|desbloqueos|recogidas)[^\\d]*(\\d+)/i)
+    || lines.match(/(\\d+)\\s*(?:activaciones|pickups|desbloqueos|recogidas)/i);
+  if(unlockMatch) result.unlocks=parseInt(unlockMatch[1]);
+
+  result.rawText=text;
+  return result;
+}
+
+function showAnalysisResult(parsed){
+  const resultEl=document.getElementById('analysisResult');
+  const dataEl=document.getElementById('analysisData');
+  const fieldsEl=document.getElementById('editableFields');
+  const lim=state.data.limits;
+
+  const apps=[
+    {name:'TikTok',icon:'📱',val:parsed.tiktok,limit:lim.tiktok},
+    {name:'Instagram',icon:'📸',val:parsed.instagram,limit:lim.instagram},
+    {name:'Roblox',icon:'🎮',val:parsed.roblox,limit:lim.roblox},
+    {name:'YouTube',icon:'▶️',val:parsed.youtube,limit:null},
+    {name:'Safari',icon:'🌐',val:parsed.safari,limit:null},
+    {name:'WhatsApp',icon:'💬',val:parsed.whatsapp,limit:null},
+  ].filter(a=>a.val>0);
+
+  let html='';
+  if(apps.length===0){
+    html='<p style="color:var(--warn);font-size:0.9rem">No se detectaron apps conocidas. Ingresa los datos manualmente abajo.</p>';
+  } else {
+    apps.forEach(a=>{
+      const ok=a.limit?a.val<=a.limit:true;
+      html+=`<div class="analysis-row">
+        <div class="analysis-app">${a.icon} ${a.name}</div>
+        <div class="analysis-time ${ok?'ok':'over'}">${a.val} min ${a.limit?`/ ${a.limit}`:''} ${a.limit?(ok?'✅':'❌'):''}</div>
+      </div>`;
+    });
+  }
+
+  if(parsed.unlocks){
+    const ok=parsed.unlocks<=lim.unlocks;
+    html+=`<div class="analysis-row">
+      <div class="analysis-app">🔓 Desbloqueos</div>
+      <div class="analysis-time ${ok?'ok':'over'}">${parsed.unlocks} / ${lim.unlocks} ${ok?'✅':'❌'}</div>
+    </div>`;
+  }
+
+  if(parsed.totalMinutes){
+    html+=`<div class="analysis-row" style="margin-top:8px;border-top:1px solid var(--bg2);padding-top:8px">
+      <div class="analysis-app">📊 Tiempo Total</div>
+      <div class="analysis-time">${Math.floor(parsed.totalMinutes/60)}h ${parsed.totalMinutes%60}m</div>
+    </div>`;
+  }
+
+  dataEl.innerHTML=html;
+  resultEl.style.display='block';
+  fieldsEl.style.display='block';
+
+  // Pre-fill editable fields
+  document.getElementById('ciTiktok').value=parsed.tiktok||'';
+  document.getElementById('ciInstagram').value=parsed.instagram||'';
+  document.getElementById('ciRoblox').value=parsed.roblox||'';
+  document.getElementById('ciUnlocks').value=parsed.unlocks||'';
+  previewXP();
+}
+
+function openImageViewer(src){
+  document.getElementById('viewerImg').src=src;
+  document.getElementById('imageViewer').classList.add('show');
+}
+function closeImageViewer(){
+  document.getElementById('imageViewer').classList.remove('show');
+}
+
+// ── XP Preview ──
+function previewXP(){
+  const tiktok=parseInt(document.getElementById('ciTiktok').value)||0;
+  const instagram=parseInt(document.getElementById('ciInstagram').value)||0;
+  const roblox=parseInt(document.getElementById('ciRoblox').value)||0;
+  const unlocks=parseInt(document.getElementById('ciUnlocks').value)||0;
+  const lim=state.data.limits;
+  const wr=getWeeklyRoblox(true)+roblox;
+
+  let xp=0,bd=[];
+  if(tiktok<=lim.tiktok){xp+=30;bd.push('TikTok OK: +30');}
+  if(instagram<=lim.instagram){xp+=30;bd.push('Instagram OK: +30');}
+  if(wr<=lim.roblox){xp+=30;bd.push('Roblox OK: +30');}
+  if(unlocks<=lim.unlocks){xp+=10;bd.push('Desbloqueos OK: +10');}
+  if(tiktok<=lim.tiktok*0.5){xp+=20;bd.push('Bonus TikTok: +20');}
+  if(instagram<=lim.instagram*0.5){xp+=20;bd.push('Bonus Instagram: +20');}
+  const perf=tiktok<=lim.tiktok&&instagram<=lim.instagram&&wr<=lim.roblox&&unlocks<=lim.unlocks;
+  if(perf&&tiktok<=lim.tiktok*0.5&&instagram<=lim.instagram*0.5){xp+=50;bd.push('⭐ Día Perfecto: +50');}
+
+  const el=document.getElementById('xpPreview');
+  if(tiktok>0||instagram>0||roblox>0||unlocks>0){
+    el.style.display='block';
+    document.getElementById('xpBreakdown').innerHTML=bd.map(b=>`<div style="font-size:0.85rem;color:var(--text2)">${b} XP</div>`).join('');
+    document.getElementById('xpTotal').textContent=`Total: +${xp} XP`;
+  } else el.style.display='none';
+}
+
+// ── Submit Check-in ──
+function doCheckin(tiktok,instagram,roblox,unlocks,hasImage){
+  const todayStr=today();
+  if(state.data.checkins[todayStr]) return showToast('Ya hiciste check-in hoy',true);
+
+  const lim=state.data.limits;
+  const wr=getWeeklyRoblox(true)+roblox;
+  let xp=0;
+  if(tiktok<=lim.tiktok)xp+=30;
+  if(instagram<=lim.instagram)xp+=30;
+  if(wr<=lim.roblox)xp+=30;
+  if(unlocks<=lim.unlocks)xp+=10;
+  if(tiktok<=lim.tiktok*0.5)xp+=20;
+  if(instagram<=lim.instagram*0.5)xp+=20;
+  const perfect=tiktok<=lim.tiktok&&instagram<=lim.instagram&&wr<=lim.roblox&&unlocks<=lim.unlocks;
+  if(perfect&&tiktok<=lim.tiktok*0.5&&instagram<=lim.instagram*0.5)xp+=50;
+
+  const yesterday=new Date(Date.now()-86400000).toISOString().split('T')[0];
+  const hadYesterday=!!state.data.checkins[yesterday];
+  const metLimits=tiktok<=lim.tiktok&&instagram<=lim.instagram&&unlocks<=lim.unlocks;
+
+  const ci={tiktok,instagram,roblox,unlocks,xpEarned:xp,perfect,timestamp:Date.now(),hasImage};
+  // Store a thumbnail reference (not full image - too big for Gun.js)
+  if(hasImage && currentImageData){
+    // Store that an image was submitted (parent can see)
+    ci.imageSubmitted=true;
+  }
+
+  state.data.checkins[todayStr]=ci;
+  const oldLevel=state.data.level;
+  state.data.xp+=xp;
+  state.data.level=Math.floor(state.data.xp/100)+1;
+  state.data.streak=metLimits?(hadYesterday?(state.data.streak||0)+1:1):0;
+  checkAchievements();
+  syncCheckin(todayStr,ci);
+  syncToGun();
+  updateUI();
+
+  if(state.data.level>oldLevel){
+    showCelebration('🎮',`¡NIVEL ${state.data.level}!`,state.data.level>=75?'¡¡¡GANASTE EL iPHONE!!! 📱🎉':'¡Sigue así!');
+  } else showToast(`+${xp} XP ${perfect?'⭐ ¡Día perfecto!':''}`);
+
+  setTimeout(()=>navigate('pageHome',document.querySelector('#navChild .nav-item:first-child')),500);
+}
+
+function submitCheckin(){
+  const t=parseInt(document.getElementById('ciTiktok').value)||0;
+  const i=parseInt(document.getElementById('ciInstagram').value)||0;
+  const r=parseInt(document.getElementById('ciRoblox').value)||0;
+  const u=parseInt(document.getElementById('ciUnlocks').value)||0;
+  if(t===0&&i===0&&r===0&&u===0) return showToast('Ingresa al menos un valor',true);
+  doCheckin(t,i,r,u,!!currentImageData);
+}
+
+function submitCheckinManual(){
+  const t=parseInt(document.getElementById('ciTiktokM').value)||0;
+  const i=parseInt(document.getElementById('ciInstagramM').value)||0;
+  const r=parseInt(document.getElementById('ciRobloxM').value)||0;
+  const u=parseInt(document.getElementById('ciUnlocksM').value)||0;
+  if(t===0&&i===0&&r===0&&u===0) return showToast('Ingresa al menos un valor',true);
+  currentImageData=null;
+  doCheckin(t,i,r,u,false);
+}
+
+// ── Achievements ──
+function checkAchievements(){
+  ACHIEVEMENTS.forEach(a=>{
+    if(!state.data.achievements[a.id]&&a.check(state.data)){
+      state.data.achievements[a.id]={unlockedAt:Date.now()};
+      if(a.id!=='FIRST_LOGIN') setTimeout(()=>showCelebration(a.icon,`¡${a.name}!`,a.desc),1500);
+    }
+  });
+}
+function updateAchievements(){
+  const el=document.getElementById('achievementsList');if(!el)return;
+  el.innerHTML=ACHIEVEMENTS.map(a=>{
+    const u=!!state.data.achievements[a.id];
+    return`<div class="achievement ${u?'':'locked'}"><div class="ach-icon">${a.icon}</div><div><div class="ach-name">${a.name} ${u?'✅':'🔒'}</div><div class="ach-desc">${a.desc}</div></div></div>`;
+  }).join('');
+}
+
+// ── Requests ──
+function submitRequest(){
+  const app=document.getElementById('reqApp').value;
+  const min=parseInt(document.getElementById('reqMinutes').value)||15;
+  const reason=document.getElementById('reqReason').value.trim();
+  if(!reason) return showToast('Escribe una razón',true);
+  const id='r'+Date.now();
+  const d={app,minutes:min,reason,status:'pending',createdAt:Date.now(),from:state.childName||'Elo'};
+  state.data.requests[id]=d;syncRequest(id,d);saveLocal();updateUI();
+  showToast('Solicitud enviada');document.getElementById('reqReason').value='';
+}
+function respondRequest(id,status){
+  if(state.data.requests[id]){
+    state.data.requests[id].status=status;state.data.requests[id].respondedAt=Date.now();
+    syncRequest(id,state.data.requests[id]);saveLocal();updateUI();
+    showToast(status==='approved'?'✅ Aprobado':'❌ Denegado');
+  }
+}
+
+// ── UI Updates ──
+function updateUI(){
+  const d=state.data,lv=d.level||1,xp=d.xp||0,xpL=xp%100,str=d.streak||0;
+  const nd=Object.keys(d.checkins||{}).length, lim=d.limits;
+
+  if(state.role==='child'){
+    document.getElementById('levelNum').textContent=lv;
+    document.getElementById('xpBar').style.width=xpL+'%';
+    document.getElementById('xpCurrent').textContent=xpL+' XP';
+    document.getElementById('statStreak').textContent=str;
+    document.getElementById('statTotalXP').textContent=xp;
+    document.getElementById('statDays').textContent=nd;
+    // Today
+    const ci=d.checkins[today()],el=document.getElementById('todayContent');
+    if(!ci) el.innerHTML='<p style="color:var(--warn)">⏳ Aún no has hecho check-in hoy</p>';
+    else el.innerHTML=`
+      <div style="font-size:0.9rem">
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">📱 TikTok: ${ci.tiktok}m <span style="color:${ci.tiktok<=lim.tiktok?'var(--neon)':'var(--danger)'}">${ci.tiktok<=lim.tiktok?'✓':'✗'}</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">📸 Instagram: ${ci.instagram}m <span style="color:${ci.instagram<=lim.instagram?'var(--neon)':'var(--danger)'}">${ci.instagram<=lim.instagram?'✓':'✗'}</span></div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">🎮 Roblox: ${ci.roblox}m ✓</div>
+        <div style="display:flex;justify-content:space-between;margin-bottom:3px">🔓 Desbloqueos: ${ci.unlocks} <span style="color:${ci.unlocks<=lim.unlocks?'var(--neon)':'var(--danger)'}">${ci.unlocks<=lim.unlocks?'✓':'✗'}</span></div>
+        <div style="margin-top:6px;font-weight:700;color:var(--neon)">+${ci.xpEarned} XP${ci.perfect?' ⭐':''} ${ci.imageSubmitted?'📸':''}
+        </div>
+      </div>`;
+  }
+  if(state.role==='parent'){
+    document.getElementById('pLevelNum').textContent=lv;
+    document.getElementById('pXpBar').style.width=xpL+'%';
+    document.getElementById('pXpCurrent').textContent=xpL+' XP';
+    document.getElementById('pStatStreak').textContent=str;
+    document.getElementById('pStatDays').textContent=nd;
+    const ci=d.checkins[today()],el=document.getElementById('pTodayContent');
+    if(!ci) el.innerHTML='<div class="empty-state" style="padding:1rem"><p>Aún no ha hecho check-in hoy</p></div>';
+    else el.innerHTML=`<div style="font-size:0.9rem">
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">📱 TikTok <span>${ci.tiktok}/${lim.tiktok}m ${ci.tiktok<=lim.tiktok?'✅':'❌'}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">📸 Instagram <span>${ci.instagram}/${lim.instagram}m ${ci.instagram<=lim.instagram?'✅':'❌'}</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">🎮 Roblox <span>${ci.roblox}m</span></div>
+      <div style="display:flex;justify-content:space-between;margin-bottom:3px">🔓 Desbloqueos <span>${ci.unlocks}/${lim.unlocks} ${ci.unlocks<=lim.unlocks?'✅':'❌'}</span></div>
+      <div style="margin-top:6px;font-weight:700;color:var(--neon)">+${ci.xpEarned} XP ${ci.perfect?'⭐ PERFECTO':''} ${ci.imageSubmitted?'📸 Con foto':''}</div>
+    </div>`;
+    updateParentRequests();
+  }
+  updateHistory();updateAchievements();updateRequestsList();
+}
+
+function updateHistory(){
+  const ci=state.data.checkins||{},sorted=Object.entries(ci).sort((a,b)=>b[0].localeCompare(a[0]));
+  const el=document.getElementById('historyList'),empty=document.getElementById('noHistory');
+  if(!el)return;
+  if(sorted.length===0){empty.style.display='block';el.innerHTML='';return;}
+  empty.style.display='none';
+  const lim=state.data.limits;
+  el.innerHTML=sorted.slice(0,30).map(([date,c])=>{
+    const d=new Date(date+'T12:00:00');
+    const dn=d.toLocaleDateString('es',{weekday:'short',day:'numeric',month:'short'});
+    return`<div class="history-day">
+      <div class="history-date">${dn} ${c.perfect?'⭐':''} ${c.imageSubmitted?'📸':''}</div>
+      <div class="history-items">
+        <span class="history-item ${c.tiktok>lim.tiktok?'over':''}">📱${c.tiktok}m</span>
+        <span class="history-item ${c.instagram>lim.instagram?'over':''}">📸${c.instagram}m</span>
+        <span class="history-item">🎮${c.roblox}m</span>
+        <span class="history-item ${c.unlocks>lim.unlocks?'over':''}">🔓${c.unlocks}</span>
+        <span class="history-xp">+${c.xpEarned} XP</span>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function updateRequestsList(){
+  const reqs=state.data.requests||{},sorted=Object.entries(reqs).sort((a,b)=>(b[1].createdAt||0)-(a[1].createdAt||0));
+  const myEl=document.getElementById('myRequests');
+  if(myEl){
+    if(sorted.length===0) myEl.innerHTML='<div class="empty-state" style="padding:1rem"><p>No has pedido tiempo extra</p></div>';
+    else myEl.innerHTML=sorted.map(([id,r])=>`<div class="request-card ${r.status}"><div class="request-header"><span class="request-app">${r.app}</span><span class="request-status status-${r.status}">${r.status==='pending'?'⏳':r.status==='approved'?'✅':'❌'}</span></div><div class="request-detail">${r.minutes} min - "${r.reason}"</div></div>`).join('');
+  }
+  const allEl=document.getElementById('allRequests'),noReq=document.getElementById('noRequests');
+  if(allEl){
+    if(sorted.length===0){noReq.style.display='block';allEl.innerHTML='';}
+    else{noReq.style.display='none';
+      allEl.innerHTML=sorted.map(([id,r])=>`<div class="request-card ${r.status}"><div class="request-header"><span class="request-app">${r.app} - ${r.minutes}m</span><span class="request-status status-${r.status}">${r.status==='pending'?'⏳':r.status==='approved'?'✅':'❌'}</span></div><div class="request-detail">"${r.reason}"</div>${r.status==='pending'?`<div class="request-actions"><button class="btn btn-neon btn-sm" onclick="respondRequest('${id}','approved')">✅ Aprobar</button><button class="btn btn-danger btn-sm" onclick="respondRequest('${id}','denied')">❌ Denegar</button></div>`:''}</div>`).join('');
+    }
+  }
+  updateParentRequests();
+}
+
+function updateParentRequests(){
+  const reqs=state.data.requests||{};
+  const pending=Object.entries(reqs).filter(([_,r])=>r.status==='pending');
+  const card=document.getElementById('pRequestsCard'),el=document.getElementById('pPendingRequests');
+  if(!card||!el)return;
+  if(pending.length===0)card.style.display='none';
+  else{card.style.display='block';
+    el.innerHTML=pending.map(([id,r])=>`<div class="request-card pending" style="margin-bottom:8px"><div style="font-weight:600">${r.app} - ${r.minutes}m</div><div class="request-detail">"${r.reason}"</div><div class="request-actions"><button class="btn btn-neon btn-sm" onclick="respondRequest('${id}','approved')">✅ Aprobar</button><button class="btn btn-danger btn-sm" onclick="respondRequest('${id}','denied')">❌ Denegar</button></div></div>`).join('');
+  }
+}
+
+function saveLimits(){
+  state.data.limits={
+    tiktok:parseInt(document.getElementById('limTiktok').value)||30,
+    instagram:parseInt(document.getElementById('limInstagram').value)||20,
+    roblox:parseInt(document.getElementById('limRoblox').value)||120,
+    unlocks:parseInt(document.getElementById('limUnlocks').value)||50
+  };
+  syncToGun();updateUI();showToast('Límites guardados');
+}
+
+function resetApp(){
+  if(confirm('¿Cerrar sesión?')){localStorage.removeItem('level11_pwa_v2');location.reload();}
+}
+
+// PWA
+let deferredPrompt=null;
+window.addEventListener('beforeinstallprompt',e=>{e.preventDefault();deferredPrompt=e;});
+function installPWA(){
+  if(deferredPrompt){deferredPrompt.prompt();deferredPrompt=null;}
+  else showToast('Safari: Compartir → Agregar a Inicio');
+}
+
+// Drag & drop
+document.addEventListener('DOMContentLoaded',()=>{
+  const area=document.getElementById('uploadArea');
+  if(area){
+    ['dragenter','dragover'].forEach(e=>area.addEventListener(e,ev=>{ev.preventDefault();area.classList.add('dragover');}));
+    ['dragleave','drop'].forEach(e=>area.addEventListener(e,ev=>{ev.preventDefault();area.classList.remove('dragover');}));
+    area.addEventListener('drop',e=>{
+      const file=e.dataTransfer.files[0];
+      if(file){document.getElementById('fileInput').files=e.dataTransfer.files;handleFileUpload({target:{files:[file]}});}
+    });
+  }
+});
+
+// Service Worker
+if('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(e=>console.log('SW:',e));
+
+// Online/Offline
+window.addEventListener('online',()=>updateSyncStatus(true));
+window.addEventListener('offline',()=>updateSyncStatus(false));
+
+// Init
+window.addEventListener('DOMContentLoaded',()=>{
+  setTimeout(()=>{
+    document.getElementById('loading').classList.add('hidden');
+    if(loadLocal()){connectGun();startApp();}
+    else document.getElementById('setup').style.display='block';
+  },800);
+});
+</script>
+</body>
+</html>
