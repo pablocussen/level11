@@ -7,6 +7,7 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="theme-color" content="#0a0a0f">
 <link rel="manifest" href="./manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 180 180'><rect width='180' height='180' rx='40' fill='%230a0a0f'/><text x='90' y='125' font-size='100' text-anchor='middle'>🎮</text></svg>">
 <title>Level:11 - Elo & Papá</title>
 <style>
 /* ═══════════════════════════════════════════
@@ -56,6 +57,7 @@ body {
   animation: spin 0.8s linear infinite;
 }
 @keyframes spin { to { transform: rotate(360deg); } }
+#loading .status { color: var(--text2); font-size: 0.85rem; margin-top: 1rem; }
 
 /* Setup Screen */
 #setup {
@@ -83,19 +85,6 @@ body {
 }
 .setup-card p { color: var(--text2); font-size: 0.9rem; margin-bottom: 1rem; }
 
-/* Firebase Config */
-#firebaseSetup { display: none; }
-#firebaseSetup textarea {
-  width: 100%; height: 200px;
-  background: var(--bg); color: var(--neon);
-  border: 1px solid var(--bg3); border-radius: 8px;
-  padding: 0.8rem; font-family: monospace; font-size: 0.8rem;
-  resize: vertical;
-}
-#firebaseSetup .hint {
-  font-size: 0.75rem; color: var(--text2); margin-top: 0.5rem;
-}
-
 /* Buttons */
 .btn {
   display: block; width: 100%; padding: 14px;
@@ -104,17 +93,11 @@ body {
   cursor: pointer; transition: all 0.2s;
   text-align: center;
 }
-.btn-neon {
-  background: var(--neon); color: #000;
-}
+.btn-neon { background: var(--neon); color: #000; }
 .btn-neon:hover { filter: brightness(1.2); }
 .btn-neon:disabled { opacity: 0.4; cursor: not-allowed; }
-.btn-blue {
-  background: var(--neon2); color: #000;
-}
-.btn-pink {
-  background: var(--pink); color: #fff;
-}
+.btn-blue { background: var(--neon2); color: #000; }
+.btn-pink { background: var(--pink); color: #fff; }
 .btn-outline {
   background: transparent; color: var(--neon);
   border: 1px solid var(--neon);
@@ -124,9 +107,7 @@ body {
   padding: 8px 16px; width: auto; display: inline-block;
   font-size: 0.85rem; border-radius: 8px;
 }
-.btn-danger {
-  background: var(--danger); color: #fff;
-}
+.btn-danger { background: var(--danger); color: #fff; }
 
 /* Inputs */
 input[type="text"], input[type="number"], input[type="password"], select, textarea {
@@ -136,9 +117,7 @@ input[type="text"], input[type="number"], input[type="password"], select, textar
   font-size: 1rem; outline: none;
   transition: border-color 0.2s;
 }
-input:focus, select:focus, textarea:focus {
-  border-color: var(--neon);
-}
+input:focus, select:focus, textarea:focus { border-color: var(--neon); }
 label {
   display: block; font-size: 0.85rem;
   color: var(--text2); margin-bottom: 4px; margin-top: 12px;
@@ -157,15 +136,19 @@ label {
   display: flex; align-items: center; justify-content: space-between;
   position: sticky; top: 0; z-index: 100;
 }
-.app-header h1 {
-  font-size: 1.1rem; color: var(--neon);
-}
+.app-header h1 { font-size: 1.1rem; color: var(--neon); }
 .app-header .role-badge {
   font-size: 0.75rem; padding: 4px 10px;
   border-radius: 20px; font-weight: 600;
 }
 .role-child { background: var(--neon2); color: #000; }
 .role-parent { background: var(--pink); color: #fff; }
+.sync-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  display: inline-block; margin-left: 8px;
+}
+.sync-dot.online { background: var(--neon); }
+.sync-dot.offline { background: var(--danger); }
 
 .app-content {
   max-width: 480px; margin: 0 auto;
@@ -186,7 +169,7 @@ label {
   align-items: center; gap: 2px;
   cursor: pointer; border: none; background: none;
   color: var(--text2); font-size: 0.65rem;
-  transition: color 0.2s;
+  transition: color 0.2s; position: relative;
 }
 .nav-item.active { color: var(--neon); }
 .nav-item .nav-icon { font-size: 1.3rem; }
@@ -211,24 +194,17 @@ label {
 }
 
 /* Level Display */
-.level-display {
-  text-align: center; padding: 20px 0;
-}
+.level-display { text-align: center; padding: 20px 0; }
 .level-number {
   font-size: 4rem; font-weight: 800;
   color: var(--neon);
   text-shadow: 0 0 30px rgba(0,255,65,0.4);
   line-height: 1;
 }
-.level-label {
-  font-size: 0.9rem; color: var(--text2);
-  margin-top: 4px;
-}
+.level-label { font-size: 0.9rem; color: var(--text2); margin-top: 4px; }
 
 /* XP Bar */
-.xp-bar-container {
-  margin: 12px 0;
-}
+.xp-bar-container { margin: 12px 0; }
 .xp-bar-bg {
   height: 8px; background: var(--bg3);
   border-radius: 4px; overflow: hidden;
@@ -243,20 +219,13 @@ label {
 }
 
 /* Stats Grid */
-.stats-grid {
-  display: grid; grid-template-columns: 1fr 1fr;
-  gap: 8px;
-}
+.stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
 .stat-item {
   background: var(--bg3); border-radius: 8px;
   padding: 12px; text-align: center;
 }
-.stat-value {
-  font-size: 1.5rem; font-weight: 700; color: var(--neon);
-}
-.stat-label {
-  font-size: 0.7rem; color: var(--text2); margin-top: 2px;
-}
+.stat-value { font-size: 1.5rem; font-weight: 700; color: var(--neon); }
+.stat-label { font-size: 0.7rem; color: var(--text2); margin-top: 2px; }
 
 /* Check-in Form */
 .checkin-row {
@@ -266,18 +235,12 @@ label {
   border-bottom: 1px solid var(--bg3);
 }
 .checkin-row:last-child { border-bottom: none; }
-.checkin-app {
-  display: flex; align-items: center; gap: 8px;
-}
+.checkin-app { display: flex; align-items: center; gap: 8px; }
 .checkin-app .icon { font-size: 1.3rem; }
 .checkin-app .name { font-size: 0.9rem; }
 .checkin-app .limit { font-size: 0.7rem; color: var(--text2); }
-.checkin-input {
-  width: 80px; text-align: center; padding: 8px;
-}
-.checkin-status {
-  width: 28px; text-align: center; font-size: 1.1rem;
-}
+.checkin-input { width: 80px; text-align: center; padding: 8px; }
+.checkin-status { width: 28px; text-align: center; font-size: 1.1rem; }
 
 /* Request Card */
 .request-card {
@@ -300,12 +263,8 @@ label {
 .status-pending { background: rgba(255,107,53,0.2); color: var(--warn); }
 .status-approved { background: rgba(0,255,65,0.2); color: var(--neon); }
 .status-denied { background: rgba(255,7,58,0.2); color: var(--danger); }
-.request-detail {
-  font-size: 0.85rem; color: var(--text2); margin-bottom: 4px;
-}
-.request-actions {
-  display: flex; gap: 8px; margin-top: 10px;
-}
+.request-detail { font-size: 0.85rem; color: var(--text2); margin-bottom: 4px; }
+.request-actions { display: flex; gap: 8px; margin-top: 10px; }
 
 /* History */
 .history-day {
@@ -323,10 +282,7 @@ label {
 }
 .history-item { color: var(--text2); }
 .history-item.over { color: var(--danger); }
-.history-xp {
-  font-weight: 700; color: var(--neon);
-  margin-left: auto;
-}
+.history-xp { font-weight: 700; color: var(--neon); margin-left: auto; }
 
 /* Achievements */
 .achievement {
@@ -380,20 +336,14 @@ label {
 .settings-label { font-size: 0.9rem; }
 .settings-value { font-size: 0.9rem; color: var(--text2); }
 
-/* Section Headers */
 .section-header {
   display: flex; justify-content: space-between;
   align-items: center; margin-bottom: 12px;
 }
-.section-title {
-  font-size: 1.1rem; font-weight: 700;
-}
+.section-title { font-size: 1.1rem; font-weight: 700; }
 
 /* Empty State */
-.empty-state {
-  text-align: center; padding: 3rem 1rem;
-  color: var(--text2);
-}
+.empty-state { text-align: center; padding: 3rem 1rem; color: var(--text2); }
 .empty-state .empty-icon { font-size: 3rem; margin-bottom: 1rem; }
 .empty-state p { font-size: 0.9rem; }
 
@@ -401,7 +351,6 @@ label {
 .page { display: none; }
 .page.active { display: block; }
 
-/* Animations */
 @keyframes fadeIn {
   from { opacity: 0; transform: translateY(10px); }
   to { opacity: 1; transform: translateY(0); }
@@ -417,14 +366,12 @@ label {
   display: none;
 }
 .install-banner p {
-  font-size: 0.85rem; margin-bottom: 10px;
-  color: var(--text2);
+  font-size: 0.85rem; margin-bottom: 10px; color: var(--text2);
 }
 
-/* Responsive */
 @media (max-width: 360px) {
   .level-number { font-size: 3rem; }
-  .stats-grid { grid-template-columns: 1fr 1fr; gap: 6px; }
+  .stats-grid { gap: 6px; }
 }
 </style>
 </head>
@@ -434,6 +381,7 @@ label {
 <div id="loading">
   <h1>LEVEL:11</h1>
   <div class="spinner"></div>
+  <div class="status" id="loadingStatus">Conectando...</div>
 </div>
 
 <!-- ═══ SETUP ═══ -->
@@ -441,31 +389,10 @@ label {
   <h1>🎮 LEVEL:11</h1>
   <p class="subtitle">Bienestar Digital Gamificado</p>
 
-  <!-- Step 1: Firebase Config -->
+  <!-- Step 1: Role Selection -->
   <div id="setupStep1" class="setup-card">
-    <h2>Paso 1: Conectar Firebase</h2>
-    <p>Pega aquí la configuración de Firebase (el objeto firebaseConfig de tu proyecto):</p>
-    <textarea id="fbConfigInput" placeholder='{
-  "apiKey": "...",
-  "authDomain": "...",
-  "databaseURL": "...",
-  "projectId": "...",
-  "storageBucket": "...",
-  "messagingSenderId": "...",
-  "appId": "..."
-}'></textarea>
-    <p class="hint">Ve a Firebase Console → Tu Proyecto → Configuración → SDK config → Config</p>
-    <div style="margin-top:12px">
-      <button class="btn btn-neon" onclick="validateFirebaseConfig()">Conectar</button>
-    </div>
-    <div style="margin-top:12px; text-align:center">
-      <button class="btn btn-outline btn-sm" onclick="showOfflineMode()">Usar sin Firebase (offline)</button>
-    </div>
-  </div>
-
-  <!-- Step 2: Role Selection -->
-  <div id="setupStep2" class="setup-card" style="display:none">
-    <h2>Paso 2: ¿Quién eres?</h2>
+    <h2>¿Quién eres?</h2>
+    <p>La app se sincroniza automáticamente entre dispositivos. Sin cuentas, sin configuración.</p>
     <div style="display:flex; gap:10px; margin-top:12px">
       <button class="btn btn-blue" style="flex:1" onclick="selectRole('child')">
         👧 Soy Elo
@@ -476,26 +403,24 @@ label {
     </div>
   </div>
 
-  <!-- Step 3: Family Code -->
-  <div id="setupStep3" class="setup-card" style="display:none">
-    <h2 id="step3Title">Paso 3</h2>
-    <div id="step3Create" style="display:none">
-      <p>Crea un código familiar. Compártelo con Elo para que se conecte.</p>
-      <label>Código familiar (4+ caracteres)</label>
-      <input type="text" id="familyCodeCreate" placeholder="ej: elo2025" maxlength="20">
-      <label>PIN de papá (4 dígitos)</label>
-      <input type="password" id="parentPin" placeholder="1234" maxlength="4" inputmode="numeric">
-      <div style="margin-top:12px">
-        <button class="btn btn-neon" onclick="createFamily()">Crear Familia</button>
+  <!-- Step 2: Family Code -->
+  <div id="setupStep2" class="setup-card" style="display:none">
+    <h2 id="step2Title"></h2>
+    <div id="step2Create" style="display:none">
+      <p>Crea un código familiar secreto. Luego dáselo a Elo para que se conecte desde su iPhone.</p>
+      <label>Código familiar (4+ letras/números)</label>
+      <input type="text" id="familyCodeCreate" placeholder="ej: elo2025" maxlength="20" autocomplete="off">
+      <div style="margin-top:14px">
+        <button class="btn btn-neon" onclick="createFamily()">Crear y Entrar</button>
       </div>
     </div>
-    <div id="step3Join" style="display:none">
+    <div id="step2Join" style="display:none">
       <p>Ingresa el código familiar que te dio tu papá.</p>
       <label>Código familiar</label>
-      <input type="text" id="familyCodeJoin" placeholder="ej: elo2025" maxlength="20">
+      <input type="text" id="familyCodeJoin" placeholder="ej: elo2025" maxlength="20" autocomplete="off">
       <label>Tu nombre</label>
       <input type="text" id="childName" placeholder="Elo" maxlength="30" value="Elo">
-      <div style="margin-top:12px">
+      <div style="margin-top:14px">
         <button class="btn btn-neon" onclick="joinFamily()">Unirme</button>
       </div>
     </div>
@@ -504,16 +429,13 @@ label {
 
 <!-- ═══ MAIN APP ═══ -->
 <div id="app">
-  <!-- Header -->
   <div class="app-header">
-    <h1>LEVEL:11</h1>
+    <h1>LEVEL:11 <span class="sync-dot" id="syncDot" title="Estado de conexión"></span></h1>
     <span class="role-badge" id="roleBadge"></span>
   </div>
 
   <div class="app-content">
-    <!-- ═══ CHILD PAGES ═══ -->
-
-    <!-- Home / Dashboard -->
+    <!-- ═══ CHILD: Home ═══ -->
     <div class="page" id="pageHome">
       <div class="level-display fade-in">
         <div class="level-number" id="levelNum">1</div>
@@ -547,20 +469,18 @@ label {
         </div>
       </div>
 
-      <!-- Install PWA Banner -->
       <div class="install-banner" id="installBanner">
-        <p>📲 Instala Level:11 como app en tu dispositivo</p>
-        <button class="btn btn-neon btn-sm" onclick="installPWA()">Instalar App</button>
+        <p>📲 Instala Level:11 como app en tu dispositivo para acceso rápido</p>
+        <button class="btn btn-neon btn-sm" onclick="installPWA()">Instalar</button>
       </div>
 
-      <!-- Today's Check-in Status -->
       <div class="card" style="margin-top:12px" id="todayStatus">
         <div class="card-title">HOY</div>
         <div id="todayContent"></div>
       </div>
     </div>
 
-    <!-- Check-in Page -->
+    <!-- ═══ CHILD: Check-in ═══ -->
     <div class="page" id="pageCheckin">
       <div class="section-header">
         <div class="section-title">Check-in Diario</div>
@@ -572,50 +492,37 @@ label {
         <div class="checkin-row">
           <div class="checkin-app">
             <span class="icon">📱</span>
-            <div>
-              <div class="name">TikTok</div>
-              <div class="limit">Límite: 30 min</div>
-            </div>
+            <div><div class="name">TikTok</div><div class="limit" id="limLabelTiktok">Límite: 30 min</div></div>
           </div>
-          <input type="number" class="checkin-input" id="ciTiktok" min="0" max="999" placeholder="min">
+          <input type="number" class="checkin-input" id="ciTiktok" min="0" max="999" placeholder="min" inputmode="numeric">
           <div class="checkin-status" id="csTiktok"></div>
         </div>
         <div class="checkin-row">
           <div class="checkin-app">
             <span class="icon">📸</span>
-            <div>
-              <div class="name">Instagram</div>
-              <div class="limit">Límite: 20 min</div>
-            </div>
+            <div><div class="name">Instagram</div><div class="limit" id="limLabelInsta">Límite: 20 min</div></div>
           </div>
-          <input type="number" class="checkin-input" id="ciInstagram" min="0" max="999" placeholder="min">
+          <input type="number" class="checkin-input" id="ciInstagram" min="0" max="999" placeholder="min" inputmode="numeric">
           <div class="checkin-status" id="csInstagram"></div>
         </div>
         <div class="checkin-row">
           <div class="checkin-app">
             <span class="icon">🎮</span>
-            <div>
-              <div class="name">Roblox</div>
-              <div class="limit" id="robloxLimit">Límite: 120 min/sem</div>
-            </div>
+            <div><div class="name">Roblox</div><div class="limit" id="limLabelRoblox">Límite: 120 min/sem</div></div>
           </div>
-          <input type="number" class="checkin-input" id="ciRoblox" min="0" max="999" placeholder="min">
+          <input type="number" class="checkin-input" id="ciRoblox" min="0" max="999" placeholder="min" inputmode="numeric">
           <div class="checkin-status" id="csRoblox"></div>
         </div>
         <div class="checkin-row">
           <div class="checkin-app">
             <span class="icon">🔓</span>
-            <div>
-              <div class="name">Desbloqueos</div>
-              <div class="limit">Límite: 50/día</div>
-            </div>
+            <div><div class="name">Desbloqueos</div><div class="limit" id="limLabelUnlocks">Límite: 50/día</div></div>
           </div>
-          <input type="number" class="checkin-input" id="ciUnlocks" min="0" max="999" placeholder="n°">
+          <input type="number" class="checkin-input" id="ciUnlocks" min="0" max="999" placeholder="n°" inputmode="numeric">
           <div class="checkin-status" id="csUnlocks"></div>
         </div>
       </div>
 
-      <!-- XP Preview -->
       <div class="card" id="xpPreview" style="display:none">
         <div class="card-title">XP QUE GANARÁS</div>
         <div id="xpBreakdown"></div>
@@ -627,7 +534,7 @@ label {
       </button>
     </div>
 
-    <!-- Request Time Page (Child) -->
+    <!-- ═══ CHILD: Request Time ═══ -->
     <div class="page" id="pageRequest">
       <div class="section-header">
         <div class="section-title">Pedir Más Tiempo</div>
@@ -638,34 +545,30 @@ label {
           <option value="TikTok">📱 TikTok</option>
           <option value="Instagram">📸 Instagram</option>
           <option value="Roblox">🎮 Roblox</option>
+          <option value="YouTube">▶️ YouTube</option>
           <option value="Otro">📦 Otro</option>
         </select>
         <label>¿Cuántos minutos extra?</label>
-        <input type="number" id="reqMinutes" min="5" max="120" placeholder="15" value="15">
+        <input type="number" id="reqMinutes" min="5" max="120" placeholder="15" value="15" inputmode="numeric">
         <label>¿Por qué lo necesitas?</label>
-        <input type="text" id="reqReason" placeholder="ej: Tutorial de arte">
+        <input type="text" id="reqReason" placeholder="ej: Tutorial de arte que dura 20 min">
         <div style="margin-top:14px">
-          <button class="btn btn-neon" onclick="submitRequest()">Enviar Solicitud</button>
+          <button class="btn btn-neon" onclick="submitRequest()">Enviar Solicitud a Papá</button>
         </div>
       </div>
-
       <div style="margin-top:16px">
         <div class="card-title">MIS SOLICITUDES</div>
         <div id="myRequests"></div>
       </div>
     </div>
 
-    <!-- ═══ PARENT PAGES ═══ -->
-
-    <!-- Parent Dashboard -->
+    <!-- ═══ PARENT: Dashboard ═══ -->
     <div class="page" id="pageParentHome">
       <div class="section-header">
         <div class="section-title">Dashboard Parental</div>
       </div>
-
-      <!-- Child Status Card -->
       <div class="card">
-        <div class="card-title">ESTADO DE ELO</div>
+        <div class="card-title">ESTADO DE <span id="pChildName">ELO</span></div>
         <div class="level-display" style="padding:10px 0">
           <div class="level-number" style="font-size:2.5rem" id="pLevelNum">1</div>
           <div class="level-label">NIVEL</div>
@@ -691,24 +594,20 @@ label {
         </div>
       </div>
 
-      <!-- Today Check-in -->
       <div class="card">
         <div class="card-title">CHECK-IN DE HOY</div>
         <div id="pTodayContent">
-          <div class="empty-state" style="padding:1rem">
-            <p>Elo aún no ha hecho check-in hoy</p>
-          </div>
+          <div class="empty-state" style="padding:1rem"><p>Elo aún no ha hecho check-in hoy</p></div>
         </div>
       </div>
 
-      <!-- Pending Requests -->
       <div class="card" id="pRequestsCard" style="display:none">
         <div class="card-title">⚡ SOLICITUDES PENDIENTES</div>
         <div id="pPendingRequests"></div>
       </div>
     </div>
 
-    <!-- Parent Requests Page -->
+    <!-- ═══ PARENT: All Requests ═══ -->
     <div class="page" id="pageParentRequests">
       <div class="section-header">
         <div class="section-title">Solicitudes</div>
@@ -720,9 +619,7 @@ label {
       </div>
     </div>
 
-    <!-- ═══ SHARED PAGES ═══ -->
-
-    <!-- History Page -->
+    <!-- ═══ SHARED: History ═══ -->
     <div class="page" id="pageHistory">
       <div class="section-header">
         <div class="section-title">Historial</div>
@@ -734,7 +631,7 @@ label {
       </div>
     </div>
 
-    <!-- Achievements Page -->
+    <!-- ═══ SHARED: Achievements ═══ -->
     <div class="page" id="pageAchievements">
       <div class="section-header">
         <div class="section-title">Logros</div>
@@ -742,7 +639,7 @@ label {
       <div id="achievementsList"></div>
     </div>
 
-    <!-- Settings Page -->
+    <!-- ═══ SHARED: Settings ═══ -->
     <div class="page" id="pageSettings">
       <div class="section-header">
         <div class="section-title">Ajustes</div>
@@ -753,28 +650,28 @@ label {
           <span class="settings-value" id="settRole"></span>
         </div>
         <div class="settings-item">
-          <span class="settings-label">Familia</span>
+          <span class="settings-label">Código Familiar</span>
           <span class="settings-value" id="settFamily"></span>
         </div>
         <div class="settings-item">
-          <span class="settings-label">Firebase</span>
-          <span class="settings-value" id="settFb"></span>
+          <span class="settings-label">Sincronización</span>
+          <span class="settings-value" id="settSync">Conectando...</span>
         </div>
         <div class="settings-item">
           <span class="settings-label">Versión</span>
-          <span class="settings-value">1.0.0</span>
+          <span class="settings-value">2.0.0</span>
         </div>
       </div>
       <div class="card" id="parentLimitsCard" style="display:none">
         <div class="card-title">LÍMITES</div>
         <label>TikTok (min/día)</label>
-        <input type="number" id="limTiktok" value="30" min="0">
+        <input type="number" id="limTiktok" value="30" min="0" inputmode="numeric">
         <label>Instagram (min/día)</label>
-        <input type="number" id="limInstagram" value="20" min="0">
+        <input type="number" id="limInstagram" value="20" min="0" inputmode="numeric">
         <label>Roblox (min/semana)</label>
-        <input type="number" id="limRoblox" value="120" min="0">
+        <input type="number" id="limRoblox" value="120" min="0" inputmode="numeric">
         <label>Desbloqueos (por día)</label>
-        <input type="number" id="limUnlocks" value="50" min="0">
+        <input type="number" id="limUnlocks" value="50" min="0" inputmode="numeric">
         <div style="margin-top:12px">
           <button class="btn btn-neon btn-sm" onclick="saveLimits()">Guardar Límites</button>
         </div>
@@ -785,7 +682,7 @@ label {
     </div>
   </div>
 
-  <!-- Bottom Navigation - Child -->
+  <!-- Bottom Nav - Child -->
   <div class="bottom-nav" id="navChild" style="display:none">
     <button class="nav-item active" data-page="pageHome" onclick="navigate('pageHome',this)">
       <span class="nav-icon">🏠</span> Inicio
@@ -804,7 +701,7 @@ label {
     </button>
   </div>
 
-  <!-- Bottom Navigation - Parent -->
+  <!-- Bottom Nav - Parent -->
   <div class="bottom-nav" id="navParent" style="display:none">
     <button class="nav-item active" data-page="pageParentHome" onclick="navigate('pageParentHome',this)">
       <span class="nav-icon">📊</span> Dashboard
@@ -835,43 +732,41 @@ label {
 <!-- Toast -->
 <div class="toast" id="toast"></div>
 
-<!-- ═══════════════════════════════════════════
-     FIREBASE SDK (compat mode for simplicity)
-     ═══════════════════════════════════════════ -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-database-compat.js"></script>
+<!-- ═══ GUN.JS - Peer-to-peer sync (no server needed) ═══ -->
+<script src="https://cdn.jsdelivr.net/npm/gun/gun.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gun/sea.js"></script>
 
 <script>
 /* ═══════════════════════════════════════════
-   LEVEL:11 PWA - Main Application
+   LEVEL:11 PWA v2.0 - Gun.js Edition
+   Zero config, instant sync
    ═══════════════════════════════════════════ */
 
+// ─── Gun.js Setup ───
+const gun = Gun({
+  peers: [
+    'https://gun-manhattan.herokuapp.com/gun',
+    'https://gun-us.herokuapp.com/gun'
+  ],
+  localStorage: true
+});
+
 // ─── State ───
-let db = null;
-let familyRef = null;
+let familyGun = null;
 let state = {
-  role: null,        // 'child' | 'parent'
+  role: null,
   familyCode: null,
-  firebaseConfig: null,
-  offlineMode: false,
   childName: 'Elo',
   data: {
-    xp: 0,
-    level: 1,
-    streak: 0,
+    xp: 0, level: 1, streak: 0,
     checkins: {},
     achievements: {},
     requests: {},
-    limits: {
-      tiktok: 30,
-      instagram: 20,
-      roblox: 120,
-      unlocks: 50
-    }
+    limits: { tiktok: 30, instagram: 20, roblox: 120, unlocks: 50 }
   }
 };
 
-// ─── Achievements Definition ───
+// ─── Achievements ───
 const ACHIEVEMENTS = [
   { id: 'FIRST_LOGIN', name: 'Primer Acceso', desc: 'Abriste la app', icon: '◈', check: d => true },
   { id: 'FIREWALL', name: 'Firewall', desc: '3 días consecutivos', icon: '◉', check: d => d.streak >= 3 },
@@ -882,7 +777,7 @@ const ACHIEVEMENTS = [
   { id: 'WARRIOR', name: 'Guerrero', desc: 'Nivel 25', icon: '⬡', check: d => d.level >= 25 },
   { id: 'HERO', name: 'Héroe', desc: 'Nivel 50', icon: '◆', check: d => d.level >= 50 },
   { id: 'LEGEND', name: 'LEYENDA', desc: 'Nivel 75 - iPHONE 13!', icon: '♔', check: d => d.level >= 75 },
-  { id: 'PERFECT_WEEK', name: 'Semana Perfecta', desc: '7 días perfectos', icon: '✦', check: d => countPerfectDays(d) >= 7 },
+  { id: 'PERFECT_WEEK', name: 'Semana Perfecta', desc: '7 días perfectos seguidos', icon: '✦', check: d => countPerfectDays(d) >= 7 },
   { id: 'MINDFLAYER', name: 'Mind Flayer', desc: 'Nivel 60+', icon: '✧', check: d => d.level >= 60 },
 ];
 
@@ -891,9 +786,7 @@ function countPerfectDays(d) {
 }
 
 // ─── Helpers ───
-function today() {
-  return new Date().toISOString().split('T')[0];
-}
+function today() { return new Date().toISOString().split('T')[0]; }
 
 function getWeekStart() {
   const d = new Date();
@@ -902,18 +795,20 @@ function getWeekStart() {
   return new Date(d.setDate(diff)).toISOString().split('T')[0];
 }
 
-function getWeeklyRoblox() {
+function getWeeklyRoblox(excludeToday) {
   const weekStart = getWeekStart();
+  const todayStr = today();
   let total = 0;
   for (const [date, ci] of Object.entries(state.data.checkins || {})) {
     if (date >= weekStart && ci.roblox) {
+      if (excludeToday && date === todayStr) continue;
       total += ci.roblox;
     }
   }
   return total;
 }
 
-function showToast(msg, isError = false) {
+function showToast(msg, isError) {
   const t = document.getElementById('toast');
   t.textContent = msg;
   t.className = 'toast show' + (isError ? ' error' : '');
@@ -935,125 +830,147 @@ function closeCelebration() {
 function navigate(pageId, btn) {
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.getElementById(pageId).classList.add('active');
-
   const nav = state.role === 'child' ? 'navChild' : 'navParent';
   document.querySelectorAll(`#${nav} .nav-item`).forEach(b => b.classList.remove('active'));
   if (btn) btn.classList.add('active');
 }
 
-// ─── Firebase Setup ───
-function validateFirebaseConfig() {
-  const input = document.getElementById('fbConfigInput').value.trim();
-  try {
-    let config = JSON.parse(input);
-    if (!config.apiKey || !config.databaseURL || !config.projectId) {
-      throw new Error('Missing fields');
-    }
-    state.firebaseConfig = config;
-    initFirebase(config);
-    document.getElementById('setupStep1').style.display = 'none';
-    document.getElementById('setupStep2').style.display = 'block';
-    showToast('Firebase conectado');
-  } catch (e) {
-    showToast('Config inválida. Revisa el formato JSON.', true);
-  }
-}
-
-function showOfflineMode() {
-  state.offlineMode = true;
-  document.getElementById('setupStep1').style.display = 'none';
-  document.getElementById('setupStep2').style.display = 'block';
-  showToast('Modo offline activado');
-}
-
-function initFirebase(config) {
-  try {
-    firebase.initializeApp(config);
-    db = firebase.database();
-  } catch (e) {
-    if (e.code === 'app/duplicate-app') {
-      db = firebase.database();
-    } else {
-      showToast('Error conectando Firebase', true);
-      console.error(e);
-    }
-  }
-}
-
-// ─── Role & Family ───
+// ─── Setup ───
 function selectRole(role) {
   state.role = role;
-  document.getElementById('setupStep2').style.display = 'none';
-  document.getElementById('setupStep3').style.display = 'block';
+  document.getElementById('setupStep1').style.display = 'none';
+  document.getElementById('setupStep2').style.display = 'block';
 
   if (role === 'parent') {
-    document.getElementById('step3Title').textContent = 'Paso 3: Crear Familia';
-    document.getElementById('step3Create').style.display = 'block';
-    document.getElementById('step3Join').style.display = 'none';
+    document.getElementById('step2Title').textContent = 'Crear Código Familiar';
+    document.getElementById('step2Create').style.display = 'block';
+    document.getElementById('step2Join').style.display = 'none';
   } else {
-    document.getElementById('step3Title').textContent = 'Paso 3: Unirse a Familia';
-    document.getElementById('step3Create').style.display = 'none';
-    document.getElementById('step3Join').style.display = 'block';
+    document.getElementById('step2Title').textContent = 'Unirse a Familia';
+    document.getElementById('step2Create').style.display = 'none';
+    document.getElementById('step2Join').style.display = 'block';
   }
 }
 
-async function createFamily() {
+function createFamily() {
   const code = document.getElementById('familyCodeCreate').value.trim().toLowerCase();
-  const pin = document.getElementById('parentPin').value.trim();
-
-  if (code.length < 4) return showToast('El código debe tener al menos 4 caracteres', true);
-  if (pin.length !== 4 || !/^\d{4}$/.test(pin)) return showToast('El PIN debe ser de 4 dígitos', true);
-
+  if (code.length < 4) return showToast('Mínimo 4 caracteres', true);
   state.familyCode = code;
-
-  if (!state.offlineMode && db) {
-    try {
-      const snap = await db.ref(`families/${code}`).once('value');
-      if (snap.exists()) {
-        return showToast('Este código ya existe, elige otro', true);
-      }
-      await db.ref(`families/${code}`).set({
-        createdAt: Date.now(),
-        parentPin: pin,
-        limits: state.data.limits,
-        data: { xp: 0, level: 1, streak: 0, checkins: {}, achievements: {}, requests: {} }
-      });
-    } catch (e) {
-      console.error(e);
-      showToast('Error de conexión. Usando modo offline.', true);
-      state.offlineMode = true;
-    }
-  }
-
   saveLocal();
+  connectGun();
   startApp();
 }
 
-async function joinFamily() {
+function joinFamily() {
   const code = document.getElementById('familyCodeJoin').value.trim().toLowerCase();
   const name = document.getElementById('childName').value.trim() || 'Elo';
-
   if (code.length < 4) return showToast('Código inválido', true);
-
   state.familyCode = code;
   state.childName = name;
+  saveLocal();
+  connectGun();
 
-  if (!state.offlineMode && db) {
+  // Save child name
+  familyGun.get('childName').put(name);
+  startApp();
+}
+
+// ─── Gun.js Sync ───
+function connectGun() {
+  // Use family code as namespace for data isolation
+  familyGun = gun.get('level11_' + state.familyCode);
+
+  // Listen to all data changes
+  familyGun.get('gameData').on(function(gunData) {
+    if (!gunData) return;
+    // Merge Gun data into state (Gun stores flat, we handle nested objects separately)
+    if (gunData.xp !== undefined) state.data.xp = gunData.xp;
+    if (gunData.level !== undefined) state.data.level = gunData.level;
+    if (gunData.streak !== undefined) state.data.streak = gunData.streak;
+    updateUI();
+  });
+
+  // Listen to checkins
+  familyGun.get('checkins').map().on(function(ciData, dateKey) {
+    if (!ciData || dateKey === '_') return;
     try {
-      const snap = await db.ref(`families/${code}`).once('value');
-      if (!snap.exists()) {
-        return showToast('Familia no encontrada. Verifica el código.', true);
+      const ci = typeof ciData === 'string' ? JSON.parse(ciData) : ciData;
+      if (ci && ci.tiktok !== undefined) {
+        state.data.checkins[dateKey] = ci;
+        updateUI();
       }
-      await db.ref(`families/${code}/childName`).set(name);
-    } catch (e) {
-      console.error(e);
-      showToast('Error de conexión. Usando modo offline.', true);
-      state.offlineMode = true;
+    } catch(e) {}
+  });
+
+  // Listen to requests
+  familyGun.get('requests').map().on(function(reqData, reqKey) {
+    if (!reqData || reqKey === '_') return;
+    try {
+      const req = typeof reqData === 'string' ? JSON.parse(reqData) : reqData;
+      if (req && req.app) {
+        state.data.requests[reqKey] = req;
+        updateUI();
+      }
+    } catch(e) {}
+  });
+
+  // Listen to limits
+  familyGun.get('limits').on(function(limData) {
+    if (!limData) return;
+    if (limData.tiktok !== undefined) state.data.limits.tiktok = limData.tiktok;
+    if (limData.instagram !== undefined) state.data.limits.instagram = limData.instagram;
+    if (limData.roblox !== undefined) state.data.limits.roblox = limData.roblox;
+    if (limData.unlocks !== undefined) state.data.limits.unlocks = limData.unlocks;
+    updateUI();
+  });
+
+  // Listen to child name
+  familyGun.get('childName').on(function(name) {
+    if (name && typeof name === 'string') {
+      state.childName = name;
+      const el = document.getElementById('pChildName');
+      if (el) el.textContent = name.toUpperCase();
     }
-  }
+  });
+
+  // Sync indicator
+  updateSyncStatus(true);
+}
+
+function syncToGun() {
+  if (!familyGun) return;
+
+  // Sync core game data
+  familyGun.get('gameData').put({
+    xp: state.data.xp,
+    level: state.data.level,
+    streak: state.data.streak
+  });
+
+  // Sync limits
+  familyGun.get('limits').put(state.data.limits);
 
   saveLocal();
-  startApp();
+}
+
+function syncCheckin(dateKey, checkinData) {
+  if (!familyGun) return;
+  familyGun.get('checkins').get(dateKey).put(JSON.stringify(checkinData));
+}
+
+function syncRequest(reqKey, reqData) {
+  if (!familyGun) return;
+  familyGun.get('requests').get(reqKey).put(JSON.stringify(reqData));
+}
+
+function updateSyncStatus(connected) {
+  const dot = document.getElementById('syncDot');
+  if (dot) {
+    dot.className = 'sync-dot ' + (connected ? 'online' : 'offline');
+    dot.title = connected ? 'Conectado' : 'Sin conexión';
+  }
+  const settSync = document.getElementById('settSync');
+  if (settSync) settSync.textContent = connected ? 'Conectado (P2P)' : 'Offline';
 }
 
 // ─── App Start ───
@@ -1075,19 +992,15 @@ function startApp() {
     document.getElementById('navChild').style.display = 'none';
     navigate('pageParentHome');
     document.getElementById('parentLimitsCard').style.display = 'block';
+    // Load current limits into inputs
+    document.getElementById('limTiktok').value = state.data.limits.tiktok;
+    document.getElementById('limInstagram').value = state.data.limits.instagram;
+    document.getElementById('limRoblox').value = state.data.limits.roblox;
+    document.getElementById('limUnlocks').value = state.data.limits.unlocks;
   }
 
-  // Settings
   document.getElementById('settRole').textContent = state.role === 'child' ? 'Hija' : 'Papá';
-  document.getElementById('settFamily').textContent = state.familyCode || 'offline';
-  document.getElementById('settFb').textContent = state.offlineMode ? 'Offline' : 'Conectado';
-
-  // Listen for data
-  if (!state.offlineMode && db && state.familyCode) {
-    listenFirebase();
-  } else {
-    updateUI();
-  }
+  document.getElementById('settFamily').textContent = state.familyCode;
 
   // Check-in input listeners
   ['ciTiktok', 'ciInstagram', 'ciRoblox', 'ciUnlocks'].forEach(id => {
@@ -1097,51 +1010,18 @@ function startApp() {
   // Achievement: FIRST_LOGIN
   if (!state.data.achievements.FIRST_LOGIN) {
     state.data.achievements.FIRST_LOGIN = { unlockedAt: Date.now() };
-    syncData();
+    saveLocal();
   }
 
   checkInstallPWA();
-}
-
-// ─── Firebase Listeners ───
-function listenFirebase() {
-  familyRef = db.ref(`families/${state.familyCode}`);
-
-  familyRef.child('data').on('value', snap => {
-    if (snap.exists()) {
-      state.data = { ...state.data, ...snap.val() };
-      // Ensure nested objects
-      if (!state.data.checkins) state.data.checkins = {};
-      if (!state.data.achievements) state.data.achievements = {};
-      if (!state.data.requests) state.data.requests = {};
-      updateUI();
-    }
-  });
-
-  familyRef.child('limits').on('value', snap => {
-    if (snap.exists()) {
-      state.data.limits = snap.val();
-      updateUI();
-    }
-  });
-}
-
-function syncData() {
-  saveLocal();
-  if (!state.offlineMode && familyRef) {
-    familyRef.child('data').set(state.data).catch(e => {
-      console.error('Sync error:', e);
-    });
-  }
+  updateUI();
 }
 
 // ─── Local Storage ───
 function saveLocal() {
-  localStorage.setItem('level11_pwa', JSON.stringify({
+  localStorage.setItem('level11_pwa_v2', JSON.stringify({
     role: state.role,
     familyCode: state.familyCode,
-    firebaseConfig: state.firebaseConfig,
-    offlineMode: state.offlineMode,
     childName: state.childName,
     data: state.data
   }));
@@ -1149,12 +1029,16 @@ function saveLocal() {
 
 function loadLocal() {
   try {
-    const saved = JSON.parse(localStorage.getItem('level11_pwa'));
+    const saved = JSON.parse(localStorage.getItem('level11_pwa_v2'));
     if (saved && saved.role && saved.familyCode) {
-      state = { ...state, ...saved };
+      state.role = saved.role;
+      state.familyCode = saved.familyCode;
+      state.childName = saved.childName || 'Elo';
+      state.data = saved.data || state.data;
       if (!state.data.checkins) state.data.checkins = {};
       if (!state.data.achievements) state.data.achievements = {};
       if (!state.data.requests) state.data.requests = {};
+      if (!state.data.limits) state.data.limits = { tiktok: 30, instagram: 20, roblox: 120, unlocks: 50 };
       return true;
     }
   } catch (e) {}
@@ -1169,6 +1053,17 @@ function updateUI() {
   const xpInLevel = totalXP % 100;
   const streak = d.streak || 0;
   const numDays = Object.keys(d.checkins || {}).length;
+  const lim = d.limits;
+
+  // Update limit labels on checkin form
+  const limLabelTiktok = document.getElementById('limLabelTiktok');
+  if (limLabelTiktok) limLabelTiktok.textContent = `Límite: ${lim.tiktok} min`;
+  const limLabelInsta = document.getElementById('limLabelInsta');
+  if (limLabelInsta) limLabelInsta.textContent = `Límite: ${lim.instagram} min`;
+  const limLabelRoblox = document.getElementById('limLabelRoblox');
+  if (limLabelRoblox) limLabelRoblox.textContent = `Límite: ${lim.roblox} min/sem`;
+  const limLabelUnlocks = document.getElementById('limLabelUnlocks');
+  if (limLabelUnlocks) limLabelUnlocks.textContent = `Límite: ${lim.unlocks}/día`;
 
   if (state.role === 'child') {
     document.getElementById('levelNum').textContent = level;
@@ -1195,7 +1090,6 @@ function updateUI() {
   updateHistory();
   updateAchievements();
   updateRequestsList();
-  saveLocal();
 }
 
 function updateTodayStatus() {
@@ -1206,23 +1100,23 @@ function updateTodayStatus() {
   } else {
     const lim = state.data.limits;
     el.innerHTML = `
-      <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom:4px">
+      <div style="display:flex;justify-content:space-between;font-size:0.9rem;margin-bottom:4px">
         <span>📱 TikTok: ${ci.tiktok} min</span>
-        <span style="color:${ci.tiktok <= lim.tiktok ? 'var(--neon)' : 'var(--danger)'}">${ci.tiktok <= lim.tiktok ? '✓' : '✗'}</span>
+        <span style="color:${ci.tiktok<=lim.tiktok?'var(--neon)':'var(--danger)'}">${ci.tiktok<=lim.tiktok?'✓':'✗'}</span>
       </div>
-      <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom:4px">
+      <div style="display:flex;justify-content:space-between;font-size:0.9rem;margin-bottom:4px">
         <span>📸 Instagram: ${ci.instagram} min</span>
-        <span style="color:${ci.instagram <= lim.instagram ? 'var(--neon)' : 'var(--danger)'}">${ci.instagram <= lim.instagram ? '✓' : '✗'}</span>
+        <span style="color:${ci.instagram<=lim.instagram?'var(--neon)':'var(--danger)'}">${ci.instagram<=lim.instagram?'✓':'✗'}</span>
       </div>
-      <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom:4px">
+      <div style="display:flex;justify-content:space-between;font-size:0.9rem;margin-bottom:4px">
         <span>🎮 Roblox: ${ci.roblox} min</span>
         <span style="color:var(--neon)">✓</span>
       </div>
-      <div style="display:flex; justify-content:space-between; font-size:0.9rem; margin-bottom:4px">
+      <div style="display:flex;justify-content:space-between;font-size:0.9rem;margin-bottom:4px">
         <span>🔓 Desbloqueos: ${ci.unlocks}</span>
-        <span style="color:${ci.unlocks <= lim.unlocks ? 'var(--neon)' : 'var(--danger)'}">${ci.unlocks <= lim.unlocks ? '✓' : '✗'}</span>
+        <span style="color:${ci.unlocks<=lim.unlocks?'var(--neon)':'var(--danger)'}">${ci.unlocks<=lim.unlocks?'✓':'✗'}</span>
       </div>
-      <div style="margin-top:8px; font-weight:700; color:var(--neon)">+${ci.xpEarned} XP</div>
+      <div style="margin-top:8px;font-weight:700;color:var(--neon)">+${ci.xpEarned} XP${ci.perfect?' ⭐':''}</div>
     `;
   }
 }
@@ -1231,30 +1125,30 @@ function updateParentToday() {
   const ci = state.data.checkins[today()];
   const el = document.getElementById('pTodayContent');
   if (!ci) {
-    el.innerHTML = '<div class="empty-state" style="padding:1rem"><p>Elo aún no ha hecho check-in hoy</p></div>';
+    el.innerHTML = '<div class="empty-state" style="padding:1rem"><p>Aún no ha hecho check-in hoy</p></div>';
   } else {
     const lim = state.data.limits;
     el.innerHTML = `
       <div style="font-size:0.9rem">
         <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <span>📱 TikTok</span><span>${ci.tiktok}/${lim.tiktok} min ${ci.tiktok <= lim.tiktok ? '✅' : '❌'}</span>
+          <span>📱 TikTok</span><span>${ci.tiktok}/${lim.tiktok} min ${ci.tiktok<=lim.tiktok?'✅':'❌'}</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <span>📸 Instagram</span><span>${ci.instagram}/${lim.instagram} min ${ci.instagram <= lim.instagram ? '✅' : '❌'}</span>
+          <span>📸 Instagram</span><span>${ci.instagram}/${lim.instagram} min ${ci.instagram<=lim.instagram?'✅':'❌'}</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:4px">
           <span>🎮 Roblox</span><span>${ci.roblox} min</span>
         </div>
         <div style="display:flex;justify-content:space-between;margin-bottom:4px">
-          <span>🔓 Desbloqueos</span><span>${ci.unlocks}/${lim.unlocks} ${ci.unlocks <= lim.unlocks ? '✅' : '❌'}</span>
+          <span>🔓 Desbloqueos</span><span>${ci.unlocks}/${lim.unlocks} ${ci.unlocks<=lim.unlocks?'✅':'❌'}</span>
         </div>
-        <div style="margin-top:8px;font-weight:700;color:var(--neon)">+${ci.xpEarned} XP ${ci.perfect ? '⭐ DÍA PERFECTO' : ''}</div>
+        <div style="margin-top:8px;font-weight:700;color:var(--neon)">+${ci.xpEarned} XP ${ci.perfect?'⭐ DÍA PERFECTO':''}</div>
       </div>
     `;
   }
 }
 
-// ─── Check-in Logic ───
+// ─── Check-in ───
 function previewXP() {
   const tiktok = parseInt(document.getElementById('ciTiktok').value) || 0;
   const instagram = parseInt(document.getElementById('ciInstagram').value) || 0;
@@ -1262,28 +1156,21 @@ function previewXP() {
   const unlocks = parseInt(document.getElementById('ciUnlocks').value) || 0;
 
   const lim = state.data.limits;
-  const weeklyRoblox = getWeeklyRoblox() + roblox;
+  const weeklyRoblox = getWeeklyRoblox(true) + roblox;
 
-  // Status indicators
   document.getElementById('csTiktok').textContent = tiktok <= lim.tiktok ? '✅' : '❌';
   document.getElementById('csInstagram').textContent = instagram <= lim.instagram ? '✅' : '❌';
   document.getElementById('csRoblox').textContent = weeklyRoblox <= lim.roblox ? '✅' : '❌';
   document.getElementById('csUnlocks').textContent = unlocks <= lim.unlocks ? '✅' : '❌';
 
-  // Calculate XP
-  let xp = 0;
-  let breakdown = [];
-
+  let xp = 0, breakdown = [];
   if (tiktok <= lim.tiktok) { xp += 30; breakdown.push('TikTok OK: +30 XP'); }
   if (instagram <= lim.instagram) { xp += 30; breakdown.push('Instagram OK: +30 XP'); }
   if (weeklyRoblox <= lim.roblox) { xp += 30; breakdown.push('Roblox OK: +30 XP'); }
   if (unlocks <= lim.unlocks) { xp += 10; breakdown.push('Desbloqueos OK: +10 XP'); }
+  if (tiktok <= lim.tiktok * 0.5) { xp += 20; breakdown.push('Bonus TikTok disciplinado: +20 XP'); }
+  if (instagram <= lim.instagram * 0.5) { xp += 20; breakdown.push('Bonus Instagram disciplinado: +20 XP'); }
 
-  // Bonus: very disciplined
-  if (tiktok <= lim.tiktok * 0.5 && tiktok >= 0) { xp += 20; breakdown.push('Bonus TikTok disciplinado: +20 XP'); }
-  if (instagram <= lim.instagram * 0.5 && instagram >= 0) { xp += 20; breakdown.push('Bonus Instagram disciplinado: +20 XP'); }
-
-  // Perfect day
   const perfect = tiktok <= lim.tiktok && instagram <= lim.instagram &&
                   weeklyRoblox <= lim.roblox && unlocks <= lim.unlocks;
   if (perfect && tiktok <= lim.tiktok * 0.5 && instagram <= lim.instagram * 0.5) {
@@ -1294,7 +1181,7 @@ function previewXP() {
   if (tiktok > 0 || instagram > 0 || roblox > 0 || unlocks > 0) {
     previewEl.style.display = 'block';
     document.getElementById('xpBreakdown').innerHTML = breakdown.map(b =>
-      `<div style="font-size:0.85rem; color:var(--text2); margin-bottom:2px">${b}</div>`
+      `<div style="font-size:0.85rem;color:var(--text2);margin-bottom:2px">${b}</div>`
     ).join('');
     document.getElementById('xpTotal').textContent = `Total: +${xp} XP`;
   } else {
@@ -1318,9 +1205,8 @@ function submitCheckin() {
   }
 
   const lim = state.data.limits;
-  const weeklyRoblox = getWeeklyRoblox() + roblox;
+  const weeklyRoblox = getWeeklyRoblox(true) + roblox;
 
-  // Calculate XP
   let xp = 0;
   if (tiktok <= lim.tiktok) xp += 30;
   if (instagram <= lim.instagram) xp += 30;
@@ -1331,79 +1217,62 @@ function submitCheckin() {
 
   const perfect = tiktok <= lim.tiktok && instagram <= lim.instagram &&
                   weeklyRoblox <= lim.roblox && unlocks <= lim.unlocks;
-  if (perfect && tiktok <= lim.tiktok * 0.5 && instagram <= lim.instagram * 0.5) {
-    xp += 50;
-  }
+  if (perfect && tiktok <= lim.tiktok * 0.5 && instagram <= lim.instagram * 0.5) xp += 50;
 
-  // Check yesterday for streak
+  // Streak check
   const yesterday = new Date(Date.now() - 86400000).toISOString().split('T')[0];
   const hadYesterday = !!state.data.checkins[yesterday];
+  const metLimits = tiktok <= lim.tiktok && instagram <= lim.instagram && unlocks <= lim.unlocks;
 
-  // Save check-in
-  state.data.checkins[todayStr] = {
-    tiktok, instagram, roblox, unlocks,
-    xpEarned: xp,
-    perfect,
-    timestamp: Date.now()
-  };
+  // Save checkin
+  const checkinData = { tiktok, instagram, roblox, unlocks, xpEarned: xp, perfect, timestamp: Date.now() };
+  state.data.checkins[todayStr] = checkinData;
 
-  // Update XP & Level
+  // Update stats
   const oldLevel = state.data.level;
   state.data.xp += xp;
   state.data.level = Math.floor(state.data.xp / 100) + 1;
-
-  // Streak
-  if (perfect || (tiktok <= lim.tiktok && instagram <= lim.instagram && unlocks <= lim.unlocks)) {
-    state.data.streak = hadYesterday ? (state.data.streak || 0) + 1 : 1;
-  } else {
-    state.data.streak = 0;
-  }
+  state.data.streak = metLimits ? (hadYesterday ? (state.data.streak || 0) + 1 : 1) : 0;
 
   // Check achievements
   checkAchievements();
 
-  syncData();
+  // Sync everything
+  syncCheckin(todayStr, checkinData);
+  syncToGun();
+
   updateUI();
 
-  // Celebrations
   if (state.data.level > oldLevel) {
-    showCelebration('🎮', `¡NIVEL ${state.data.level}!`, `Subiste de nivel. ${state.data.level >= 75 ? '¡¡¡GANASTE EL iPHONE!!!' : 'Sigue así!'}`);
+    showCelebration('🎮', `¡NIVEL ${state.data.level}!`,
+      state.data.level >= 75 ? '¡¡¡GANASTE EL iPHONE!!! 📱🎉' : '¡Sigue así!');
   } else {
     showToast(`+${xp} XP ${perfect ? '⭐ ¡Día perfecto!' : ''}`);
   }
 
   // Reset form
-  document.getElementById('ciTiktok').value = '';
-  document.getElementById('ciInstagram').value = '';
-  document.getElementById('ciRoblox').value = '';
-  document.getElementById('ciUnlocks').value = '';
+  ['ciTiktok', 'ciInstagram', 'ciRoblox', 'ciUnlocks'].forEach(id => document.getElementById(id).value = '');
   document.getElementById('xpPreview').style.display = 'none';
-  ['csTiktok', 'csInstagram', 'csRoblox', 'csUnlocks'].forEach(id =>
-    document.getElementById(id).textContent = ''
-  );
+  ['csTiktok', 'csInstagram', 'csRoblox', 'csUnlocks'].forEach(id => document.getElementById(id).textContent = '');
 
-  // Navigate home
-  setTimeout(() => {
-    navigate('pageHome', document.querySelector('#navChild .nav-item[data-page="pageHome"]'));
-  }, 500);
+  setTimeout(() => navigate('pageHome', document.querySelector('#navChild .nav-item[data-page="pageHome"]')), 500);
 }
 
 // ─── Achievements ───
 function checkAchievements() {
-  let newAch = false;
   ACHIEVEMENTS.forEach(a => {
     if (!state.data.achievements[a.id] && a.check(state.data)) {
       state.data.achievements[a.id] = { unlockedAt: Date.now() };
-      newAch = a;
+      if (a.id !== 'FIRST_LOGIN') {
+        setTimeout(() => showCelebration(a.icon, `¡${a.name}!`, a.desc), 1500);
+      }
     }
   });
-  if (newAch && newAch.id !== 'FIRST_LOGIN') {
-    setTimeout(() => showCelebration(newAch.icon, `¡${newAch.name}!`, newAch.desc), 1500);
-  }
 }
 
 function updateAchievements() {
   const el = document.getElementById('achievementsList');
+  if (!el) return;
   el.innerHTML = ACHIEVEMENTS.map(a => {
     const unlocked = !!state.data.achievements[a.id];
     return `
@@ -1423,82 +1292,90 @@ function submitRequest() {
   const app = document.getElementById('reqApp').value;
   const minutes = parseInt(document.getElementById('reqMinutes').value) || 15;
   const reason = document.getElementById('reqReason').value.trim();
-
   if (!reason) return showToast('Escribe una razón', true);
 
-  const id = Date.now().toString();
-  if (!state.data.requests) state.data.requests = {};
-  state.data.requests[id] = {
+  const id = 'r' + Date.now();
+  const reqData = {
     app, minutes, reason,
     status: 'pending',
     createdAt: Date.now(),
     from: state.childName || 'Elo'
   };
-
-  syncData();
+  state.data.requests[id] = reqData;
+  syncRequest(id, reqData);
+  saveLocal();
   updateUI();
-  showToast('Solicitud enviada');
-
+  showToast('Solicitud enviada a Papá');
   document.getElementById('reqReason').value = '';
+}
+
+function respondRequest(id, status) {
+  if (state.data.requests && state.data.requests[id]) {
+    state.data.requests[id].status = status;
+    state.data.requests[id].respondedAt = Date.now();
+    syncRequest(id, state.data.requests[id]);
+    saveLocal();
+    updateUI();
+    showToast(status === 'approved' ? '✅ Solicitud aprobada' : '❌ Solicitud denegada');
+  }
 }
 
 function updateRequestsList() {
   const requests = state.data.requests || {};
-  const sorted = Object.entries(requests).sort((a, b) => b[1].createdAt - a[1].createdAt);
+  const sorted = Object.entries(requests).sort((a, b) => (b[1].createdAt || 0) - (a[1].createdAt || 0));
 
   // Child view
   const myReqEl = document.getElementById('myRequests');
   if (myReqEl) {
     if (sorted.length === 0) {
-      myReqEl.innerHTML = '<div class="empty-state" style="padding:1rem"><p>No has pedido tiempo extra</p></div>';
+      myReqEl.innerHTML = '<div class="empty-state" style="padding:1rem"><p>No has pedido tiempo extra aún</p></div>';
     } else {
       myReqEl.innerHTML = sorted.map(([id, r]) => `
         <div class="request-card ${r.status}">
           <div class="request-header">
             <span class="request-app">${r.app}</span>
             <span class="request-status status-${r.status}">
-              ${r.status === 'pending' ? '⏳ Pendiente' : r.status === 'approved' ? '✅ Aprobado' : '❌ Denegado'}
+              ${r.status==='pending'?'⏳ Pendiente':r.status==='approved'?'✅ Aprobado':'❌ Denegado'}
             </span>
           </div>
           <div class="request-detail">${r.minutes} minutos extra</div>
           <div class="request-detail">"${r.reason}"</div>
           <div class="request-detail" style="font-size:0.75rem">${new Date(r.createdAt).toLocaleDateString('es')}</div>
-          ${r.parentNote ? `<div class="request-detail" style="color:var(--pink)">Papá: ${r.parentNote}</div>` : ''}
         </div>
       `).join('');
     }
   }
 
-  // Parent all requests view
+  // Parent all requests
   const allReqEl = document.getElementById('allRequests');
   if (allReqEl) {
+    const noReq = document.getElementById('noRequests');
     if (sorted.length === 0) {
-      document.getElementById('noRequests').style.display = 'block';
+      noReq.style.display = 'block';
       allReqEl.innerHTML = '';
     } else {
-      document.getElementById('noRequests').style.display = 'none';
+      noReq.style.display = 'none';
       allReqEl.innerHTML = sorted.map(([id, r]) => `
         <div class="request-card ${r.status}">
           <div class="request-header">
             <span class="request-app">${r.app} - ${r.minutes} min</span>
             <span class="request-status status-${r.status}">
-              ${r.status === 'pending' ? '⏳' : r.status === 'approved' ? '✅' : '❌'}
+              ${r.status==='pending'?'⏳':r.status==='approved'?'✅':'❌'}
             </span>
           </div>
           <div class="request-detail">"${r.reason}"</div>
           <div class="request-detail" style="font-size:0.75rem">${new Date(r.createdAt).toLocaleDateString('es')}</div>
-          ${r.status === 'pending' ? `
+          ${r.status==='pending'?`
             <div class="request-actions">
-              <button class="btn btn-neon btn-sm" onclick="respondRequest('${id}','approved')">Aprobar</button>
-              <button class="btn btn-danger btn-sm" onclick="respondRequest('${id}','denied')">Denegar</button>
+              <button class="btn btn-neon btn-sm" onclick="respondRequest('${id}','approved')">✅ Aprobar</button>
+              <button class="btn btn-danger btn-sm" onclick="respondRequest('${id}','denied')">❌ Denegar</button>
             </div>
-          ` : ''}
+          `:''}
         </div>
       `).join('');
     }
   }
 
-  // Parent dashboard pending count
   updateParentRequests();
 }
 
@@ -1508,34 +1385,22 @@ function updateParentRequests() {
   const card = document.getElementById('pRequestsCard');
   const el = document.getElementById('pPendingRequests');
 
-  if (pending.length === 0) {
-    if (card) card.style.display = 'none';
-  } else {
-    if (card) card.style.display = 'block';
-    if (el) {
-      el.innerHTML = pending.map(([id, r]) => `
-        <div class="request-card pending" style="margin-bottom:8px">
-          <div class="request-header">
-            <span class="request-app">${r.app} - ${r.minutes} min</span>
-          </div>
-          <div class="request-detail">"${r.reason}"</div>
-          <div class="request-actions">
-            <button class="btn btn-neon btn-sm" onclick="respondRequest('${id}','approved')">✅ Aprobar</button>
-            <button class="btn btn-danger btn-sm" onclick="respondRequest('${id}','denied')">❌ Denegar</button>
-          </div>
-        </div>
-      `).join('');
-    }
-  }
-}
+  if (!card || !el) return;
 
-function respondRequest(id, status) {
-  if (state.data.requests && state.data.requests[id]) {
-    state.data.requests[id].status = status;
-    state.data.requests[id].respondedAt = Date.now();
-    syncData();
-    updateUI();
-    showToast(status === 'approved' ? 'Solicitud aprobada' : 'Solicitud denegada');
+  if (pending.length === 0) {
+    card.style.display = 'none';
+  } else {
+    card.style.display = 'block';
+    el.innerHTML = pending.map(([id, r]) => `
+      <div class="request-card pending" style="margin-bottom:8px">
+        <div class="request-header"><span class="request-app">${r.app} - ${r.minutes} min</span></div>
+        <div class="request-detail">"${r.reason}"</div>
+        <div class="request-actions">
+          <button class="btn btn-neon btn-sm" onclick="respondRequest('${id}','approved')">✅ Aprobar</button>
+          <button class="btn btn-danger btn-sm" onclick="respondRequest('${id}','denied')">❌ Denegar</button>
+        </div>
+      </div>
+    `).join('');
   }
 }
 
@@ -1545,13 +1410,13 @@ function updateHistory() {
   const sorted = Object.entries(checkins).sort((a, b) => b[0].localeCompare(a[0]));
   const el = document.getElementById('historyList');
   const empty = document.getElementById('noHistory');
+  if (!el) return;
 
   if (sorted.length === 0) {
     empty.style.display = 'block';
     el.innerHTML = '';
     return;
   }
-
   empty.style.display = 'none';
   const lim = state.data.limits;
 
@@ -1560,12 +1425,12 @@ function updateHistory() {
     const dayName = d.toLocaleDateString('es', { weekday: 'short', day: 'numeric', month: 'short' });
     return `
       <div class="history-day">
-        <div class="history-date">${dayName} ${ci.perfect ? '⭐' : ''}</div>
+        <div class="history-date">${dayName} ${ci.perfect?'⭐':''}</div>
         <div class="history-items">
-          <span class="history-item ${ci.tiktok > lim.tiktok ? 'over' : ''}">📱${ci.tiktok}m</span>
-          <span class="history-item ${ci.instagram > lim.instagram ? 'over' : ''}">📸${ci.instagram}m</span>
+          <span class="history-item ${ci.tiktok>lim.tiktok?'over':''}">📱${ci.tiktok}m</span>
+          <span class="history-item ${ci.instagram>lim.instagram?'over':''}">📸${ci.instagram}m</span>
           <span class="history-item">🎮${ci.roblox}m</span>
-          <span class="history-item ${ci.unlocks > lim.unlocks ? 'over' : ''}">🔓${ci.unlocks}</span>
+          <span class="history-item ${ci.unlocks>lim.unlocks?'over':''}">🔓${ci.unlocks}</span>
           <span class="history-xp">+${ci.xpEarned} XP</span>
         </div>
       </div>
@@ -1573,7 +1438,7 @@ function updateHistory() {
   }).join('');
 }
 
-// ─── Parent Limits ───
+// ─── Limits (Parent) ───
 function saveLimits() {
   state.data.limits = {
     tiktok: parseInt(document.getElementById('limTiktok').value) || 30,
@@ -1581,17 +1446,13 @@ function saveLimits() {
     roblox: parseInt(document.getElementById('limRoblox').value) || 120,
     unlocks: parseInt(document.getElementById('limUnlocks').value) || 50
   };
-
-  if (!state.offlineMode && familyRef) {
-    familyRef.child('limits').set(state.data.limits);
-  }
-  syncData();
+  syncToGun();
+  updateUI();
   showToast('Límites guardados');
 }
 
 // ─── PWA Install ───
 let deferredPrompt = null;
-
 function checkInstallPWA() {
   window.addEventListener('beforeinstallprompt', e => {
     e.preventDefault();
@@ -1611,15 +1472,14 @@ function installPWA() {
       deferredPrompt = null;
     });
   } else {
-    // iOS instructions
     showToast('En Safari: Compartir → Agregar a Inicio');
   }
 }
 
 // ─── Reset ───
 function resetApp() {
-  if (confirm('¿Cerrar sesión? Los datos quedan guardados en Firebase.')) {
-    localStorage.removeItem('level11_pwa');
+  if (confirm('¿Cerrar sesión? Tus datos quedan sincronizados.')) {
+    localStorage.removeItem('level11_pwa_v2');
     location.reload();
   }
 }
@@ -1629,14 +1489,17 @@ if ('serviceWorker' in navigator) {
   navigator.serviceWorker.register('./sw.js').catch(e => console.log('SW:', e));
 }
 
+// ─── Online/Offline detection ───
+window.addEventListener('online', () => updateSyncStatus(true));
+window.addEventListener('offline', () => updateSyncStatus(false));
+
 // ─── Init ───
 window.addEventListener('DOMContentLoaded', () => {
+  document.getElementById('loadingStatus').textContent = 'Cargando...';
   setTimeout(() => {
     document.getElementById('loading').classList.add('hidden');
     if (loadLocal()) {
-      if (!state.offlineMode && state.firebaseConfig) {
-        initFirebase(state.firebaseConfig);
-      }
+      connectGun();
       startApp();
     } else {
       document.getElementById('setup').style.display = 'block';
